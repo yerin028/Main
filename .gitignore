@@ -1,0 +1,19 @@
+# Frontend
+front/node_modules/
+front/dist/
+front/.env
+front/.env.local
+front/.env.production
+
+# Python Backend
+back/__pycache__/
+back/venv/
+back/.env
+*.pyc
+*.pyo
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
