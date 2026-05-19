@@ -9,6 +9,7 @@ front/.env.production
 back/__pycache__/
 back/venv/
 back/.env
+back/*.db
 *.pyc
 *.pyo
 
@@ -17,3 +18,6 @@ back/.env
 Thumbs.db
 .vscode/
 .idea/
+
+# 로그
+*.log
