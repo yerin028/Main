@@ -1,1 +1,54 @@
 /*시작화면*/
+
+.start-wrapper {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f5f7fa;
+}
+
+.start-card {
+    background-color: #eef1f8;
+    border-radius: 16px;
+    padding: 120px 140px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    width: 900px;
+}
+
+.start-logo {
+    font-size: 70px;
+    color: #1a2e55;
+    margin-bottom: 20px;
+}
+
+.start-subtitle {
+    font-size: 20px;
+    color: #1a2e55;
+    margin-bottom: 20px;
+}
+
+.start-buttons {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+}
+
+.start-btn-fill {
+    padding: 14px 60px;
+    border: none;
+    border-radius: 8px;
+    background-color: #1a2e55;
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.start-btn-fill:hover {
+    opacity: 0.85;
+}
