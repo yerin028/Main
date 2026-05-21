@@ -1,1 +1,44 @@
 /*로그인*/
+
+.login-wrapper {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f5f7fa;
+}
+
+.login-card {
+  background-color: #eef1f8;
+  border-radius: 16px;
+  padding: 80px 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  width: 500px;
+}
+
+.login-title {
+  font-size: 36px;
+  font-weight: 900;
+  color: #1a2e55;
+  margin-bottom: 20px;
+}
+
+.kakao-btn {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 8px;
+  background-color: #FEE500;
+  color: #1a2e55;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.kakao-btn:hover {
+  opacity: 0.85;
+}
