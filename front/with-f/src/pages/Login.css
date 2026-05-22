@@ -58,3 +58,19 @@
 .naver-btn.hover {
   opacity: 0.85;
 }
+
+.google-btn {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid #dddddd;
+  border-radius: 8px;
+  background-color: #ffffff;
+  color: #333333;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.google-btn.hover {
+  background-color: #f5f5f5;
+}
