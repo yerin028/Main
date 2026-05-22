@@ -1,5 +1,6 @@
 // 시작화면
 
+
 import { useNavigate } from 'react-router-dom';
 import './Start.css';
 
