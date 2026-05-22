@@ -1,11 +1,17 @@
 from fastapi import APIRouter
 import httpx
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 router = APIRouter()
 
 VITE_KAKAO_CLIENT_ID = os.getenv("KAKAO_CLIENT_ID")
 VITE_KAKAO_REDIRECT_URI = os.getenv("KAKAO_REDIRECT_URI")
+
+print("CLIENT_ID:", VITE_KAKAO_CLIENT_ID)
+print("REDIRECT_URI:", VITE_KAKAO_REDIRECT_URI)
 
 @router.post("/login/kakao")
 async def kakao_login(code:str):
@@ -20,7 +26,9 @@ async def kakao_login(code:str):
         }
     )
     token_data = token_response.json()
+    print("토큰 데이터:", token_data)
     access_token = token_data.get("access_token")
+    print("액세스 토큰:", access_token)
 
     # 2. 토큰으로 사용자 정보 가져오기
     user_response = await httpx.AsyncClient().get(
@@ -28,9 +36,18 @@ async def kakao_login(code:str):
         headers={"Authorization": f"Bearer {access_token}"}
     )
     user_data = user_response.json()
+    print("유저 데이터 전체:", user_data)  
 
     # 3. 사용자 정보 DB
     kakao_id = str(user_data.get("id"))
-    nickname = user_data.get("kakao_account", {}).get("profile", {}).get("nickname")
+    # nickname = user_data.get("kakao_account", {}).get("profile", {}).get("nickname")
+    
+    # 변경된 부분 (핵심)
+    nickname = (
+        user_data
+        .get("kakao_account", {})
+        .get("profile", {})
+        .get("nickname")
+    )
 
     return {"kakao_id": kakao_id, "nickname": nickname}

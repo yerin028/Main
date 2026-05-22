@@ -8,6 +8,7 @@ function KakaoCallback() {
 
     useEffect(() => {
         const code = new URL(window.location.href).searchParams.get('code');
+        console.log(code);
 
         // 백엔드로 code 전송
         fetch(`http://localhost:8000/api/v1/auth/login/kakao?code=${code}`, {
