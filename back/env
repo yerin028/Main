@@ -1,0 +1,11 @@
+DB_HOST=54.180.31.202
+
+#MySQL
+MYSQL_USER=with
+MYSQL_PASSWORD=with0305!
+MYSQL_DB=with_MySQL
+
+#MongoDB
+MONGODB_URI=mongodb://with:with0305!@54.180.31.202:27017/with_MongoDB?authSource=admin
+
+SIGN_API_SERVICE_KEY=3d46674d-2698-48fb-a4f1-1ccc9b428fd0
