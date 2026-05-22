@@ -42,3 +42,19 @@
 .kakao-btn:hover {
   opacity: 0.85;
 }
+
+.naver-btn {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 8px;
+  background-color: #03C75A;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.naver-btn.hover {
+  opacity: 0.85;
+}

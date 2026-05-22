@@ -11,6 +11,7 @@ import CustomerService from './pages/CustomerService';
 import Payment from './pages/Payment';
 import Admin from './pages/Admin';
 import KakaoCallback from './pages/KakaoCallback';
+import NaverCallback from './pages/NaverCallback';
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
         <Route path="/payment" element={<Layout><Payment /></Layout>} />
         <Route path="/admin" element={<Layout><Admin /></Layout>} />
         <Route path="/login/oauth2/code/kakao" element={<KakaoCallback />} />
+        <Route path="/login/oauth2/code/naver" element={<NaverCallback />} />
       </Routes>
     </BrowserRouter>
   );
