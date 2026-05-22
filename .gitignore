@@ -1,7 +1,7 @@
 # Frontend
 front/node_modules/
 front/dist/
-front/.env
+front/with-f/.env
 front/.env.local
 front/.env.production
 
