@@ -1,0 +1,23 @@
+# Frontend
+front/node_modules/
+front/dist/
+front/.env
+front/.env.local
+front/.env.production
+
+# Python Backend
+back/__pycache__/
+back/venv/
+back/.env
+back/*.db
+*.pyc
+*.pyo
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# 로그
+*.log
