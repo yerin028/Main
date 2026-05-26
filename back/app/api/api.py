@@ -12,3 +12,4 @@ api_router = APIRouter()
 # 그래서 여기서는 prefix를 추가하지 않아야 /api/v1/api/v1/dictionary처럼 중복되지 않습니다.
 api_router.include_router(dictionary.router)
 api_router.include_router(auth.router, prefix="/auth", tags=["auth"])
+
