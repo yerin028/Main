@@ -1,1 +1,175 @@
-/*결제정보창*/
+.payment-page {
+  width: min(1420px, calc(100% - 96px));
+  margin: 64px auto 0;
+  padding-bottom: 56px;
+}
+
+.payment-card-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 46px;
+}
+
+.payment-card {
+  display: flex;
+  min-height: 596px;
+  flex-direction: column;
+  align-items: center;
+  padding: 68px 48px 54px;
+  border: 2px solid #b8cce8;
+  border-radius: 14px;
+  background: #ffffff;
+  color: #071631;
+  cursor: pointer;
+  font: inherit;
+  text-align: center;
+  transition:
+    border-color 0.16s ease,
+    background-color 0.16s ease,
+    box-shadow 0.16s ease,
+    transform 0.16s ease;
+}
+
+.payment-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 32px rgba(6, 42, 97, 0.12);
+}
+
+.payment-card-selected {
+  border-color: #062a61;
+  background: linear-gradient(180deg, #f8fbff, #ffffff);
+}
+
+.payment-card-disabled {
+  cursor: default;
+}
+
+.payment-card-disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.payment-plan-title {
+  display: flex;
+  min-height: 88px;
+  flex-direction: column;
+  justify-content: center;
+  color: #062a61;
+  font-size: 48px;
+  font-weight: 800;
+  line-height: 1.25;
+  text-shadow: 0 3px 0 rgba(6, 42, 97, 0.12);
+}
+
+.payment-price-box {
+  display: flex;
+  min-height: 116px;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 12px;
+  color: #062a61;
+}
+
+.payment-price {
+  font-size: 80px;
+  font-weight: 800;
+  line-height: 0.9;
+}
+
+.payment-price-unit {
+  padding-bottom: 10px;
+  font-size: 34px;
+  font-weight: 700;
+}
+
+.payment-divider {
+  width: 100%;
+  height: 2px;
+  margin: 42px 0 40px;
+  background: #bfd2ef;
+}
+
+.payment-feature-list {
+  display: grid;
+  gap: 30px;
+  width: 100%;
+}
+
+.payment-feature-item {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  align-items: center;
+  color: #071631;
+  font-size: 29px;
+  font-weight: 500;
+  text-align: left;
+}
+
+.payment-check-mark {
+  color: #062a61;
+  font-size: 42px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.payment-submit-button {
+  width: 100%;
+  min-height: 96px;
+  margin-top: 52px;
+  border: 0;
+  border-radius: 9px;
+  background: #062a61;
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 40px;
+  font-weight: 800;
+  box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.1);
+}
+
+.payment-submit-button:hover {
+  background: #041f49;
+}
+
+.payment-submit-button:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
+@media (max-width: 1200px) {
+  .payment-page {
+    width: min(620px, calc(100% - 32px));
+    margin-top: 32px;
+  }
+
+  .payment-card-list {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .payment-card {
+    min-height: auto;
+    padding: 42px 30px;
+  }
+
+  .payment-plan-title {
+    font-size: 38px;
+  }
+
+  .payment-price {
+    font-size: 64px;
+  }
+
+  .payment-price-unit {
+    font-size: 26px;
+  }
+
+  .payment-feature-item {
+    font-size: 23px;
+  }
+
+  .payment-submit-button {
+    min-height: 72px;
+    margin-top: 30px;
+    font-size: 30px;
+  }
+}
