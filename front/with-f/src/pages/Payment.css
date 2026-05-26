@@ -64,22 +64,24 @@
 .payment-price-box {
   display: flex;
   min-height: 116px;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 8px;
   color: #062a61;
 }
 
 .payment-price {
-  font-size: 80px;
+  font-size: 64px;
   font-weight: 800;
-  line-height: 0.9;
+  line-height: 1;
 }
 
 .payment-price-unit {
-  padding-bottom: 10px;
-  font-size: 34px;
+  padding-top: 8px;
+  font-size: 26px;
   font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .payment-divider {
@@ -106,10 +108,13 @@
 }
 
 .payment-check-mark {
-  color: #062a61;
-  font-size: 42px;
-  font-weight: 800;
-  line-height: 1;
+  width: 28px;
+  height: 16px;
+  margin-left: 2px;
+  border-bottom: 5px solid #062a61;
+  border-left: 5px solid #062a61;
+  transform: rotate(-45deg) translateY(-2px);
+  transform-origin: center;
 }
 
 .payment-submit-button {
@@ -156,11 +161,11 @@
   }
 
   .payment-price {
-    font-size: 64px;
+    font-size: 54px;
   }
 
   .payment-price-unit {
-    font-size: 26px;
+    font-size: 22px;
   }
 
   .payment-feature-item {

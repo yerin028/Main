@@ -239,9 +239,7 @@ function Payment() {
               <span className="payment-feature-list">
                 {paymentFeatures.map((paymentFeature) => (
                   <span className="payment-feature-item" key={paymentFeature}>
-                    <span className="payment-check-mark" aria-hidden="true">
-                      ✓
-                    </span>
+                    <span className="payment-check-mark" aria-hidden="true" />
                     <span>{paymentFeature}</span>
                   </span>
                 ))}
