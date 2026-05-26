@@ -1,7 +1,6 @@
 from fastapi import APIRouter  # 여러 endpoint 라우터를 하나로 묶을 때 사용하는 FastAPI 라우터입니다.
 
-from app.api.v1.endpoints import auth, interpreter  # 공통 api_router로 묶을 endpoint 파일들을 가져옵니다.
-
+from app.api.v1.endpoints import auth, interpreter, lessons  # 공통 api_router로 묶을 endpoint 파일들을 가져옵니다.
 
 # 여러 기능의 router를 한 번에 모아둘 수 있는 공통 API 라우터입니다.
 # 현재 main.py에서는 팀 규칙에 맞춰 dictionary_router를 직접 include하고 있습니다.
@@ -17,3 +16,8 @@ api_router.include_router(
     tags=["interpreter"],
 )
 
+api_router.include_router(
+    lessons.router,
+    prefix="/lessons",
+    tags=["lessons"],
+)
