@@ -1,4 +1,3 @@
-// 수어퀴즈
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import './Quiz.css';
@@ -296,3 +295,4 @@ function Quiz() {
 }
 
 export default Quiz;
+

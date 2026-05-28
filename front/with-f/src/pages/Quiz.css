@@ -1,4 +1,3 @@
-/*수어퀴즈*/
 :root {
   --quiz-navy: #062b67;
   --quiz-line: #bfd0ea;
@@ -650,3 +649,4 @@
 @media (max-width: 560px) {
   .quiz-category-grid { grid-template-columns: 1fr; }
 }
+
