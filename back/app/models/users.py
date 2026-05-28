@@ -22,4 +22,3 @@ class User(Base):
 
     # Relationships
     payments = relationship("Payment", back_populates="user")
-    # quiz_results = relationship("QuizResult", back_populates="user") # Uncomment if QuizResult model exists
