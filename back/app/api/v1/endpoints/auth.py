@@ -5,7 +5,7 @@ import uuid
 from dotenv import load_dotenv
 from sqlalchemy.orm import Session
 from app.core.mysql_database import get_db
-from app.models.users import UsersModel
+from app.models.users import User
 
 load_dotenv()
 
@@ -30,16 +30,16 @@ print("REDIRECT_URI:", VITE_KAKAO_REDIRECT_URI)
 
 def save_or_get_user(db: Session, social_provider: str, social_id: str, name: str, email: str = None):
     # 이미 가입한 유저인지 확인
-    existing_user = db.query(UsersModel).filter(
-        UsersModel.social_id == social_id,
-        UsersModel.social_provider == social_provider
+    existing_user = db.query(User).filter(
+        User.social_id == social_id,
+        User.social_provider == social_provider
     ).first()
 
     if existing_user:
         return existing_user
 
     # 최초 가입 시 새 유저 생성
-    new_user = UsersModel(
+    new_user = User(
         social_provider=social_provider,
         social_id=social_id,
         name=name,
