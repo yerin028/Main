@@ -1,9 +1,10 @@
 # Frontend
 front/node_modules/
 front/dist/
+front/.env
 front/with-f/.env
-front/with-f/.env.local
-front/with-f/.env.production
+front/.env.local
+front/.env.production
 
 # Python Backend
 back/__pycache__/

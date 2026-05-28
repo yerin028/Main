@@ -1,1 +1,550 @@
-/*수어학습*/
+:root {
+  --learn-navy: #062b67;
+  --learn-line: #bfd0ea;
+  --learn-soft: #eef4ff;
+}
+
+.learn-page {
+  min-height: calc(100vh - 145px);
+  color: var(--learn-navy);
+}
+
+.learn-category-page {
+  padding: 0;
+}
+
+.learn-category-title {
+  font-size: 30px;
+  line-height: 1;
+  margin-bottom: 22px;
+  font-weight: 900;
+}
+
+.learn-category-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px 32px;
+}
+
+.learn-category-card {
+  height: 132px;
+  border: 1px solid var(--learn-line);
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--learn-navy);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font: inherit;
+  font-weight: 900;
+  font-size: 20px;
+}
+
+.learn-category-card:hover {
+  border-color: var(--learn-navy);
+  box-shadow: 0 12px 28px rgba(6, 43, 103, 0.12);
+}
+
+.learn-category-icon {
+  width: 58px;
+  height: 58px;
+  position: relative;
+  display: block;
+}
+
+.learn-category-icon.person::before {
+  content: '';
+  width: 24px;
+  height: 24px;
+  border: 3px solid var(--learn-navy);
+  border-radius: 50%;
+  position: absolute;
+  top: 0;
+  left: 16px;
+}
+
+.learn-category-icon.person::after {
+  content: '';
+  width: 38px;
+  height: 28px;
+  border: 3px solid var(--learn-navy);
+  border-radius: 24px 24px 8px 8px;
+  position: absolute;
+  bottom: 0;
+  left: 7px;
+}
+
+.learn-category-icon.hands::before,
+.learn-category-icon.hands::after {
+  content: '';
+  width: 22px;
+  height: 46px;
+  border: 3px solid var(--learn-navy);
+  border-radius: 18px 18px 8px 8px;
+  position: absolute;
+  top: 6px;
+}
+
+.learn-category-icon.hands::before {
+  left: 12px;
+  transform: rotate(-8deg);
+}
+
+.learn-category-icon.hands::after {
+  right: 10px;
+  transform: rotate(8deg);
+}
+
+.learn-category-icon.family::before {
+  content: '';
+  width: 54px;
+  height: 42px;
+  border: 3px solid var(--learn-navy);
+  border-top: 0;
+  border-radius: 0 0 20px 20px;
+  position: absolute;
+  bottom: 4px;
+  left: 1px;
+}
+
+.learn-category-icon.family::after {
+  content: '';
+  width: 16px;
+  height: 16px;
+  border: 3px solid var(--learn-navy);
+  border-radius: 50%;
+  box-shadow: 22px 8px 0 -3px #ffffff, 22px 8px 0 0 var(--learn-navy);
+  position: absolute;
+  top: 2px;
+  left: 8px;
+}
+
+.learn-category-icon.school::before {
+  content: '';
+  width: 44px;
+  height: 34px;
+  border: 3px solid var(--learn-navy);
+  position: absolute;
+  left: 6px;
+  bottom: 5px;
+}
+
+.learn-category-icon.school::after {
+  content: '';
+  width: 20px;
+  height: 28px;
+  border: 3px solid var(--learn-navy);
+  border-bottom: 0;
+  transform: rotate(45deg);
+  position: absolute;
+  top: 6px;
+  left: 18px;
+}
+
+.learn-category-icon.bus::before {
+  content: '';
+  width: 44px;
+  height: 38px;
+  border: 3px solid var(--learn-navy);
+  border-radius: 8px;
+  position: absolute;
+  left: 5px;
+  top: 8px;
+}
+
+.learn-category-icon.bus::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border: 3px solid var(--learn-navy);
+  border-radius: 50%;
+  box-shadow: 28px 0 0 -3px #ffffff, 28px 0 0 0 var(--learn-navy);
+  position: absolute;
+  left: 12px;
+  bottom: 2px;
+}
+
+.learn-category-icon.clock::before {
+  content: '';
+  width: 46px;
+  height: 46px;
+  border: 3px solid var(--learn-navy);
+  border-radius: 50%;
+  position: absolute;
+  left: 4px;
+  top: 4px;
+}
+
+.learn-category-icon.clock::after {
+  content: '';
+  width: 16px;
+  height: 20px;
+  border-left: 3px solid var(--learn-navy);
+  border-bottom: 3px solid var(--learn-navy);
+  position: absolute;
+  left: 28px;
+  top: 16px;
+}
+
+.learn-category-icon.face::before {
+  content: '';
+  width: 44px;
+  height: 44px;
+  border: 3px solid var(--learn-navy);
+  border-radius: 50%;
+  position: absolute;
+  left: 5px;
+  top: 4px;
+}
+
+.learn-category-icon.face::after {
+  content: '';
+  width: 20px;
+  height: 8px;
+  border-bottom: 3px solid var(--learn-navy);
+  border-radius: 50%;
+  position: absolute;
+  left: 18px;
+  top: 30px;
+}
+
+.learn-category-icon.pen::before {
+  content: '';
+  width: 44px;
+  height: 10px;
+  border: 3px solid var(--learn-navy);
+  border-radius: 8px;
+  transform: rotate(-65deg);
+  position: absolute;
+  left: 4px;
+  top: 24px;
+}
+
+.learn-category-icon.pen::after {
+  content: '';
+  width: 34px;
+  height: 26px;
+  border-right: 3px solid var(--learn-navy);
+  border-bottom: 3px solid var(--learn-navy);
+  position: absolute;
+  right: 4px;
+  bottom: 6px;
+}
+
+.learn-study-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.learn-study-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.learn-study-toolbar label {
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.learn-category-select {
+  min-width: 180px;
+  height: 40px;
+  border: 1px solid var(--learn-line);
+  border-radius: 6px;
+  background: #ffffff;
+  color: var(--learn-navy);
+  font: inherit;
+  font-weight: 800;
+  padding: 0 12px;
+  cursor: pointer;
+}
+
+.learn-study-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(280px, 0.98fr);
+  gap: 28px;
+}
+
+.learn-video-card,
+.learn-info-card {
+  border: 1px solid var(--learn-line);
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.learn-video-card {
+  min-height: 378px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.learn-video-card video {
+  width: 100%;
+  height: 100%;
+  min-height: 378px;
+  object-fit: cover;
+}
+
+.learn-video-placeholder {
+  flex: 1;
+  min-height: 295px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #ffffff, #f7faff);
+}
+
+.learn-camera-symbol {
+  width: 104px;
+  height: 72px;
+  border: 5px solid var(--learn-navy);
+  border-radius: 12px;
+  position: relative;
+}
+
+.learn-camera-symbol::before {
+  content: '';
+  width: 42px;
+  height: 20px;
+  border: 5px solid var(--learn-navy);
+  border-bottom: 0;
+  border-radius: 12px 12px 0 0;
+  position: absolute;
+  top: -25px;
+  left: 26px;
+  background: #ffffff;
+}
+
+.learn-camera-symbol::after {
+  content: '';
+  width: 42px;
+  height: 42px;
+  border: 5px solid var(--learn-navy);
+  border-radius: 50%;
+  position: absolute;
+  top: 12px;
+  left: 26px;
+}
+
+.learn-video-controls {
+  height: 82px;
+  display: grid;
+  grid-template-columns: 22px auto 1fr 28px 28px;
+  gap: 18px;
+  align-items: center;
+  padding: 0 28px;
+}
+
+.play-icon {
+  width: 0;
+  height: 0;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  border-left: 16px solid var(--learn-navy);
+}
+
+.time-label {
+  color: #0d2c61;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.progress-track {
+  height: 4px;
+  border-radius: 4px;
+  background: #ccdaef;
+  position: relative;
+}
+
+.progress-fill {
+  width: 44%;
+  height: 4px;
+  border-radius: 4px;
+  background: var(--learn-navy);
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.progress-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--learn-navy);
+  position: absolute;
+  left: 44%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.sound-icon::before {
+  content: '';
+  display: block;
+  width: 18px;
+  height: 20px;
+  border-left: 8px solid var(--learn-navy);
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+}
+
+.screen-icon {
+  width: 22px;
+  height: 22px;
+  border: 3px solid var(--learn-navy);
+  border-radius: 2px;
+}
+
+.learn-info-card {
+  min-height: 378px;
+  padding: 40px 28px;
+}
+
+.learn-info-card p,
+.learn-info-card strong {
+  display: block;
+  font-size: 21px;
+  line-height: 1;
+  font-weight: 900;
+}
+
+.learn-info-card h1 {
+  font-size: 58px;
+  line-height: 1.1;
+  margin-top: 22px;
+  margin-bottom: 34px;
+  font-weight: 900;
+  color: var(--learn-navy);
+}
+
+.learn-info-divider {
+  height: 1px;
+  background: var(--learn-line);
+  margin-bottom: 36px;
+}
+
+.learn-info-card span {
+  display: block;
+  margin-top: 22px;
+  font-size: 22px;
+  color: #061b42;
+}
+
+.learn-back-button {
+  width: 178px;
+  height: 50px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--learn-navy);
+  color: #ffffff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.learn-back-button:hover {
+  background: #021d48;
+}
+
+.learn-study-footer {
+  display: grid;
+  grid-template-columns: 92px 1fr 92px;
+  align-items: center;
+  gap: 18px;
+  width: min(520px, 100%);
+  align-self: center;
+}
+
+.learn-step-button {
+  height: 42px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--learn-navy);
+  color: #ffffff;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 900;
+}
+
+.learn-step-button:hover:not(:disabled) {
+  background: #021d48;
+}
+
+.learn-step-button:disabled {
+  background: #cbd7ea;
+  cursor: not-allowed;
+}
+
+.learn-page-select {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  color: var(--learn-navy);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.learn-page-numbers {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+}
+
+.learn-page-numbers button {
+  width: 26px;
+  height: 26px;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--learn-navy);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.learn-page-numbers button:hover,
+.learn-page-numbers button.active {
+  border-color: var(--learn-navy);
+  background: var(--learn-soft);
+}
+
+@media (max-width: 900px) {
+  .learn-category-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .learn-study-main {
+    grid-template-columns: 1fr;
+  }
+
+  .learn-study-footer {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .learn-category-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .learn-video-controls {
+    grid-template-columns: 22px auto 1fr;
+  }
+
+  .sound-icon,
+  .screen-icon {
+    display: none;
+  }
+
+  .learn-info-card h1 {
+    font-size: 44px;
+  }
+}

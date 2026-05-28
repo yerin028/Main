@@ -128,3 +128,8 @@
 .social-btn-img:hover {
   opacity: 0.85;
 }
+
+.google-btn.hover {
+  background-color: #f5f5f5;
+}
+
