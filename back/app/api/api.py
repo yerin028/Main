@@ -7,6 +7,7 @@ from app.api.v1.endpoints import auth, interpreter, lessons  # 공통 api_router
 # 그래도 나중에 api_router 방식으로 다시 묶을 수 있도록 파일은 유지합니다.
 api_router = APIRouter()
 
+
 # dictionary.router는 main.py에서 직접 등록합니다.
 # 여기에도 dictionary.router를 넣으면 /api/v1/dictionary와 /api/v1/api/v1/dictionary가 중복 등록될 수 있습니다.
 api_router.include_router(auth.router, prefix="/auth", tags=["auth"])
