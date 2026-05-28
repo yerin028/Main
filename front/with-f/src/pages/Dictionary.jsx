@@ -1,19 +1,24 @@
 import { useEffect, useMemo, useState } from 'react'; // React 상태, 화면 진입 처리, 계산값 저장 기능
 import './Dictionary.css'; // 수어표현검색 화면 CSS
+import { useLocation } from 'react-router-dom'; // 현재 route 정보와 navigate state 값을 읽기 위해 사용합니다.
 
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000'; // 백엔드 API 주소
 const categoryPageSize = 6; // 카테고리 한 페이지 표시 개수
 const wordPageSize = 5; // 단어 한 페이지 표시 개수
 
-// 수어 API가 예전 sldict 영상 주소를 내려주면 현재 접속 가능한 krdicmedia 주소로 바꿉니다.
+// 수어 API가 http sldict 영상 주소를 내려주면 브라우저에서 안정적으로 불러올 수 있게 https 주소로 바꿉니다.
+// 일부 영상은 krdicmedia 호스트에서는 400 오류가 나지만, https sldict 주소에서는 정상 재생됩니다.
+// 그래서 호스트는 sldict 그대로 두고 http만 https로 보정합니다.
 function normalizeVideoUrl(videoUrl) {
   return videoUrl.replace(
     'http://sldict.korean.go.kr',
-    'https://krdicmedia.korean.go.kr'
+    'https://sldict.korean.go.kr'
   );
 }
 
 // 영상 파일명 규칙을 이용해 목록 미리보기에 사용할 JPG 썸네일 주소를 만듭니다.
+// 예: MOV000361377_700X466.mp4 -> MOV000361377_215X161.jpg
+// 단어선택창에서는 영상을 바로 재생하지 않아도 poster 이미지가 먼저 보여서 빈 박스처럼 보이지 않습니다.
 function getVideoPosterUrl(videoUrl) {
   return videoUrl.replace('_700X466.mp4', '_215X161.jpg');
 }
@@ -97,6 +102,10 @@ function getPaginationItems(currentPage, totalPages) {
 }
 
 function Dictionary() {
+  // Layout.jsx에서 상단 수어검색 메뉴를 다시 누르면 navigate state에 resetAt 값을 담아 보냅니다.
+  // 이 페이지에서는 useLocation으로 그 값을 읽어서 내부 화면을 첫 화면으로 되돌릴지 판단합니다.
+  const location = useLocation(); // 현재 route 정보와 state 값을 담고 있는 객체입니다.
+
   // viewMode는 피그마의 수어표현검색1/2/3 화면을 한 route 안에서 전환하기 위한 값입니다.
   // category: 카테고리 선택창, result: 단어 선택창, detail: 단어 설명창입니다.
   const [viewMode, setViewMode] = useState('category'); // 현재 화면 상태
@@ -145,7 +154,7 @@ function Dictionary() {
     return sortedCategories.slice(startIndex, startIndex + categoryPageSize);
   }, [sortedCategories, categoryPage]);
 
-  // 단어선택창도 3개씩 보여주기 때문에 전체 페이지 수를 계산합니다.
+  // 단어선택창은 5개씩 보여주기 때문에 전체 페이지 수를 계산합니다.
   const totalWordPages = Math.max(
     // 단어가 없더라도 페이지 계산값은 최소 1로 둡니다.
     1,
@@ -170,11 +179,11 @@ function Dictionary() {
     return orderedItems;
   }, [dictionaryItems, wordSortOrder]);
 
-  // 현재 단어 페이지에 보여줄 3개의 단어만 잘라냅니다.
+  // 현재 단어 페이지에 보여줄 5개의 단어만 잘라냅니다.
   const visibleDictionaryItems = useMemo(() => {
     // 현재 단어 페이지가 시작되는 배열 index를 계산합니다.
     const startIndex = (wordPage - 1) * wordPageSize;
-    // 시작 index부터 3개만 잘라서 단어 카드로 보여줍니다.
+    // 시작 index부터 5개만 잘라서 단어 카드로 보여줍니다.
     return sortedDictionaryItems.slice(startIndex, startIndex + wordPageSize);
   }, [sortedDictionaryItems, wordPage]);
 
@@ -290,6 +299,32 @@ function Dictionary() {
     }
   };
 
+  // 상단 메뉴에서 수어검색을 다시 누르면 내부 화면 상태를 첫 화면으로 초기화합니다.
+  // 같은 /dictionary 주소로 다시 이동하면 React는 컴포넌트를 새로 만들지 않기 때문에,
+  // viewMode, selectedCategory, selectedDictionary 같은 내부 상태가 그대로 남을 수 있습니다.
+  // 그래서 Layout.jsx가 보내는 resetAt 값을 기준으로 "다시 눌렀다"는 신호를 감지합니다.
+  useEffect(() => {
+    // resetAt 값이 없으면 일반적인 첫 진입이므로 여기서 따로 초기화하지 않습니다.
+    if (!location.state?.resetAt) {
+      return;
+    }
+
+    // 카테고리 선택창으로 돌아갑니다.
+    setViewMode('category');
+    // 검색창 입력값을 비웁니다.
+    setSearchKeyword('');
+    // 선택된 카테고리를 초기화합니다.
+    setSelectedCategory('');
+    // 이전 카테고리/검색 결과 단어 목록을 비웁니다.
+    setDictionaryItems([]);
+    // 상세 화면에서 선택했던 단어 정보를 비웁니다.
+    setSelectedDictionary(null);
+    // 카테고리 페이지를 첫 페이지로 되돌립니다.
+    setCategoryPage(1);
+    // 단어 페이지도 첫 페이지로 되돌립니다.
+    setWordPage(1);
+  }, [location.state?.resetAt]);
+
   // 화면 진입 시 카테고리 목록을 먼저 불러옵니다.
   useEffect(() => {
     // 컴포넌트가 처음 화면에 나타나면 카테고리 목록을 불러옵니다.
@@ -297,6 +332,10 @@ function Dictionary() {
   }, []);
 
   // 단어선택창에서 검색어가 바뀌면 잠깐 기다린 뒤 자동으로 결과를 갱신합니다.
+  // dependency에는 searchKeyword와 selectedCategory만 둡니다.
+  // viewMode까지 넣으면 상세화면에서 뒤로가기 할 때 detail -> result 변화만으로 목록을 다시 조회합니다.
+  // 그 경우 loadDictionaryItems 내부에서 wordPage가 1로 초기화되어, 8페이지에서 상세를 보고 돌아와도 1페이지로 가게 됩니다.
+  // 그래서 검색어 또는 카테고리가 실제로 바뀔 때만 재검색하여 기존 단어 페이지 위치를 유지합니다.
   useEffect(() => {
     // 카테고리 선택창이나 단어설명창에서는 실시간 검색을 실행하지 않습니다.
     if (viewMode !== 'result') {
@@ -310,7 +349,7 @@ function Dictionary() {
 
     // 검색어가 다시 바뀌면 이전 예약 검색을 취소합니다.
     return () => window.clearTimeout(timerId);
-  }, [searchKeyword, selectedCategory, viewMode]);
+  }, [searchKeyword, selectedCategory]);
 
   // 검색 버튼 클릭 시 검색 결과 화면(수어표현검색2)으로 이동합니다.
   const handleSearch = (event) => {

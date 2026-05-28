@@ -1,6 +1,6 @@
 from fastapi import APIRouter  # 여러 endpoint 라우터를 하나로 묶을 때 사용하는 FastAPI 라우터입니다.
-
 from app.api.v1.endpoints import auth, interpreter,dictionary,payment  # 수어표현검색 endpoint 파일을 가져옵니다.
+from app.api.v1.endpoints import auth, interpreter, lessons  # 공통 api_router로 묶을 endpoint 파일들을 가져옵니다.
 
 
 # 여러 기능의 router를 한 번에 모아둘 수 있는 공통 API 라우터입니다.
@@ -11,5 +11,19 @@ api_router = APIRouter()
 # dictionary.router는 이미 prefix="/api/v1/dictionary"를 가지고 있습니다.
 # 그래서 여기서는 prefix를 추가하지 않아야 /api/v1/api/v1/dictionary처럼 중복되지 않습니다.
 api_router.include_router(dictionary.router)
-api_router.include_router(auth.router, prefix="/auth", tags=["auth"])
 api_router.include_router(payment.router, prefix="/payment", tags=["payment"])
+
+# dictionary.router는 main.py에서 직접 등록합니다.
+# 여기에도 dictionary.router를 넣으면 /api/v1/dictionary와 /api/v1/api/v1/dictionary가 중복 등록될 수 있습니다.
+api_router.include_router(auth.router, prefix="/auth", tags=["auth"])
+api_router.include_router(
+    interpreter.router,
+    prefix="/interpreter",
+    tags=["interpreter"],
+)
+
+api_router.include_router(
+    lessons.router,
+    prefix="/lessons",
+    tags=["lessons"],
+)

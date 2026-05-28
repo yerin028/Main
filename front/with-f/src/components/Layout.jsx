@@ -40,7 +40,19 @@ function Layout({ children }) {
             <span
               key={item.label}
               className={`navbar-item ${activeMenu === item.label ? 'active' : ''}`}
-              onClick={() => navigate(item.path)}
+              onClick={() => {
+                // 수어검색 페이지는 한 route 안에서 카테고리/단어목록/상세화면을 상태로 전환합니다.
+                // 이미 /dictionary에 있는 상태에서 메뉴를 다시 누르면 주소가 같아서 페이지가 새로고침되지 않습니다.
+                // 그래서 resetAt 값을 state로 보내 Dictionary.jsx가 첫 화면으로 초기화할 수 있게 합니다.
+                if (item.path === '/dictionary') {
+                  // Date.now()는 클릭할 때마다 다른 값이 되므로 useEffect가 매번 다시 실행됩니다.
+                  navigate('/dictionary', { state: { resetAt: Date.now() } });
+                  return;
+                }
+
+                // 다른 메뉴들은 기존처럼 해당 path로 이동합니다.
+                navigate(item.path);
+              }}
             >
               {item.label}
               {activeMenu === item.label && <div className="navbar-underline" />}
