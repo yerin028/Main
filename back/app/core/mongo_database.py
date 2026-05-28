@@ -24,6 +24,11 @@ def get_mongo_collection(collection_name: str = "recognition_logs"):
     return db[collection_name]
 
 
+def get_dictionary_collection():
+    # 수어표현검색 데이터가 저장되는 MongoDB 컬렉션입니다.
+    return db["Dictionary"]
+
+
 # ==========================================
 # [MongoDB 데이터 삽입 기능 가이드] - 내부 주석화
 # ==========================================
