@@ -1,6 +1,5 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
-from sqlalchemy.sql import func
 
 from app.core.mysql_database import Base
 
@@ -15,8 +14,7 @@ class Payment(Base):
     toss_order_id = Column(String(100), nullable=True)
     paid_at = Column(DateTime, nullable=True)
     toss_payment_key = Column(String(100), nullable=True)
-    
+
     user_id = Column(Integer, ForeignKey("Users.user_id"), nullable=False)
 
-    # Relationships
     user = relationship("User", back_populates="payments")

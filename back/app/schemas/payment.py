@@ -1,4 +1,5 @@
 from datetime import datetime
+
 from pydantic import BaseModel, Field
 
 
@@ -16,8 +17,26 @@ class PaymentCreate(PaymentBase):
     pass
 
 
+class PaymentStatusUpdate(BaseModel):
+    payment_status: str = Field(..., max_length=50)
+    payment_method: str | None = Field(default=None, max_length=50)
+    paid_at: datetime | None = None
+
+
+class PaymentConfirm(BaseModel):
+    payment_key: str = Field(..., max_length=200)
+    order_id: str = Field(..., max_length=100)
+    amount: int = Field(..., ge=0)
+    user_id: int
+
+
 class PaymentSchema(PaymentBase):
     payment_id: int
 
     class Config:
         from_attributes = True
+
+
+PaymentCreateSchema = PaymentCreate
+PaymentStatusUpdateSchema = PaymentStatusUpdate
+PaymentConfirmSchema = PaymentConfirm
