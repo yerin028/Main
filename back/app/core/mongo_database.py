@@ -24,6 +24,13 @@ def get_mongo_collection():
     return db["recognition_logs"]
 
 
+def get_dictionary_collection():
+    # 수어표현검색 데이터가 저장되는 MongoDB 컬렉션입니다.
+    # MongoDB collection 이름은 대소문자를 구분하므로 실제 생성된 Dictionary 이름과 맞춰야 합니다.
+    # MySQL은 사용자/결제 정보만 사용하기로 했기 때문에 수어사전 데이터는 이 컬렉션에 저장합니다.
+    return db["Dictionary"]
+
+
 # ==========================================
 # [MongoDB 데이터 삽입 기능 가이드] - 내부 주석화
 # ==========================================
