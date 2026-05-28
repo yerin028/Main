@@ -9,7 +9,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.core.mysql_database import engine, get_db
-from app.models.payment import PaymentModel
+from app.models.payment import Payment
 from app.schemas.payment import (
     PaymentConfirmSchema,
     PaymentCreateSchema,
@@ -24,7 +24,7 @@ TOSS_CONFIRM_URL = "https://api.tosspayments.com/v1/payments/confirm"
 
 
 def ensure_payment_table():
-    PaymentModel.__table__.create(bind=engine, checkfirst=True)
+    Payment.__table__.create(bind=engine, checkfirst=True)
 
 
 def get_toss_authorization_header():
@@ -58,7 +58,7 @@ def create_payment(
 ):
     ensure_payment_table()
 
-    payment = PaymentModel(
+    payment = Payment(
         amount=payment_create.amount,
         payment_status=payment_create.payment_status,
         payment_method=payment_create.payment_method,
@@ -113,13 +113,13 @@ async def confirm_payment(
         )
 
     payment = (
-        db.query(PaymentModel)
-        .filter(PaymentModel.toss_order_id == payment_confirm.order_id)
+        db.query(Payment)
+        .filter(Payment.toss_order_id == payment_confirm.order_id)
         .first()
     )
 
     if payment is None:
-        payment = PaymentModel(
+        payment = Payment(
             toss_order_id=payment_confirm.order_id,
             user_id=payment_confirm.user_id,
         )
@@ -128,7 +128,7 @@ async def confirm_payment(
     payment.amount = toss_data.get("totalAmount", payment_confirm.amount)
     payment.payment_status = toss_data.get("status", "DONE")
     payment.payment_method = toss_data.get("method")
-    payment.payment_key = toss_data.get("paymentKey", payment_confirm.payment_key)
+    payment.toss_payment_key = toss_data.get("paymentKey", payment_confirm.payment_key)
     payment.paid_at = parse_toss_datetime(toss_data.get("approvedAt"))
 
     try:
@@ -157,13 +157,13 @@ def read_payments(
 ):
     ensure_payment_table()
 
-    query = db.query(PaymentModel)
+    query = db.query(Payment)
 
     if user_id is not None:
-        query = query.filter(PaymentModel.user_id == user_id)
+        query = query.filter(Payment.user_id == user_id)
 
     return (
-        query.order_by(PaymentModel.payment_id.desc())
+        query.order_by(Payment.payment_id.desc())
         .offset((page - 1) * size)
         .limit(size)
         .all()
@@ -182,8 +182,8 @@ def read_payment(
     ensure_payment_table()
 
     payment = (
-        db.query(PaymentModel)
-        .filter(PaymentModel.payment_id == payment_id)
+        db.query(Payment)
+        .filter(Payment.payment_id == payment_id)
         .first()
     )
 
@@ -209,8 +209,8 @@ def update_payment_status(
     ensure_payment_table()
 
     payment = (
-        db.query(PaymentModel)
-        .filter(PaymentModel.payment_id == payment_id)
+        db.query(Payment)
+        .filter(Payment.payment_id == payment_id)
         .first()
     )
 

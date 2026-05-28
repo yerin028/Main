@@ -1,18 +1,20 @@
-from sqlalchemy import Column, DateTime, Integer, String
-from sqlalchemy.sql import func
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy.orm import relationship
 
 from app.core.mysql_database import Base
 
 
-class PaymentModel(Base):
-    __tablename__ = "Payment"
+class Payment(Base):
+    __tablename__ = "payment"
 
-    payment_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    payment_id = Column(Integer, primary_key=True, autoincrement=True)
     amount = Column(Integer, nullable=False)
     payment_status = Column(String(50), nullable=False)
-    payment_method = Column(String(100), nullable=True)
-    toss_order_id = Column(String(255), nullable=True)
-    payment_key = Column(String(255), nullable=True)
-    paid_at = Column(DateTime(timezone=True), nullable=True)
-    user_id = Column(Integer, nullable=True)
-    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    payment_method = Column(String(50), nullable=True)
+    toss_order_id = Column(String(100), nullable=True)
+    paid_at = Column(DateTime, nullable=True)
+    toss_payment_key = Column(String(100), nullable=True)
+
+    user_id = Column(Integer, ForeignKey("users.user_id"), nullable=False)
+
+    user = relationship("User", back_populates="payments")
