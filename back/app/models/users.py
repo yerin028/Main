@@ -3,8 +3,8 @@ from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.core.mysql_database import Base
 
-class UsersModel(Base):
-    __tablename__ = "users"
+class User(Base):
+    __tablename__ = "Users"
 
     user_id               = Column(Integer, primary_key=True, autoincrement=True)
     email                 = Column(String(255), unique=True, nullable=True)
