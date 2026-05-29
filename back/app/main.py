@@ -26,6 +26,7 @@ app.add_middleware(
 app.include_router(dictionary_router)
 app.include_router(api_router, prefix="/api/v1")
 
+
 @app.get("/")
 def read_root():
     # 서버가 켜져 있는지 확인하는 기본 테스트 API입니다.
