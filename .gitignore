@@ -21,3 +21,4 @@ Thumbs.db
 
 # 로그
 *.log
+front/with-f/.env

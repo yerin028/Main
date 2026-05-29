@@ -1,5 +1,11 @@
 from fastapi import APIRouter, HTTPException, Query, status
+from pymongo import ASCENDING
+from pymongo.errors import PyMongoError
 
+from app.core.mongo_database import (
+    get_lesson_categories_collection,
+    get_lessons_collection,
+)
 from app.schemas.lessons import (
     LessonCategorySchema,
     LessonDetailSchema,
@@ -10,7 +16,7 @@ from app.schemas.lessons import (
 router = APIRouter()
 
 
-LESSON_CATEGORIES = [
+DEFAULT_LESSON_CATEGORIES = [
     {"category_id": 1, "name": "인사", "description": "인사 표현을 학습합니다.", "sort_order": 1},
     {"category_id": 2, "name": "일상생활", "description": "일상생활 표현을 학습합니다.", "sort_order": 2},
     {"category_id": 3, "name": "가족", "description": "가족 관련 표현을 학습합니다.", "sort_order": 3},
@@ -22,7 +28,7 @@ LESSON_CATEGORIES = [
 ]
 
 
-LESSONS = [
+DEFAULT_LESSONS = [
     {
         "lesson_id": 101,
         "category_id": 1,
@@ -59,15 +65,63 @@ LESSONS = [
 ]
 
 
-def get_category(category_id: int) -> dict | None:
-    return next(
-        (category for category in LESSON_CATEGORIES if category["category_id"] == category_id),
-        None,
-    )
+def ensure_default_lesson_data():
+    # MongoDB 컬렉션이 비어 있으면 기존 임시 데이터를 초기 데이터로 저장합니다.
+    # 이미 같은 ID가 있으면 덮어쓰지 않아 DB에서 수정한 값을 보존합니다.
+    category_collection = get_lesson_categories_collection()
+    lesson_collection = get_lessons_collection()
+
+    for category in DEFAULT_LESSON_CATEGORIES:
+        category_collection.update_one(
+            {"category_id": category["category_id"]},
+            {"$setOnInsert": category},
+            upsert=True,
+        )
+
+    for lesson in DEFAULT_LESSONS:
+        lesson_collection.update_one(
+            {"lesson_id": lesson["lesson_id"]},
+            {"$setOnInsert": lesson},
+            upsert=True,
+        )
+
+    return category_collection, lesson_collection
 
 
-def get_lesson(lesson_id: int) -> dict | None:
-    return next((lesson for lesson in LESSONS if lesson["lesson_id"] == lesson_id), None)
+def to_int(value, default: int = 0) -> int:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return default
+
+
+def convert_category_document(document) -> dict:
+    return {
+        "category_id": to_int(document.get("category_id")),
+        "name": document.get("name", ""),
+        "description": document.get("description"),
+        "sort_order": to_int(document.get("sort_order")),
+    }
+
+
+def convert_lesson_summary_document(document) -> dict:
+    return {
+        "lesson_id": to_int(document.get("lesson_id")),
+        "category_id": to_int(document.get("category_id")),
+        "word": document.get("word", ""),
+        "sort_order": to_int(document.get("sort_order")),
+    }
+
+
+def convert_lesson_detail_document(document, category: dict) -> dict:
+    return {
+        **convert_lesson_summary_document(document),
+        "category_name": category.get("name", ""),
+        "video_url": document.get("video_url"),
+        "video_type": document.get("video_type") or "placeholder",
+        "description": document.get("description"),
+        "ai_model_key": document.get("ai_model_key"),
+    }
 
 
 @router.get(
@@ -76,7 +130,12 @@ def get_lesson(lesson_id: int) -> dict | None:
     status_code=status.HTTP_200_OK,
 )
 async def read_lesson_categories():
-    return sorted(LESSON_CATEGORIES, key=lambda category: category["sort_order"])
+    try:
+        category_collection, _ = ensure_default_lesson_data()
+        categories = category_collection.find({}).sort("sort_order", ASCENDING)
+        return [convert_category_document(category) for category in categories]
+    except PyMongoError as error:
+        raise HTTPException(status_code=500, detail=f"Lesson MongoDB read failed: {error}")
 
 
 @router.get(
@@ -89,35 +148,39 @@ async def read_lessons(
     page: int = Query(default=1, ge=1, description="Lesson page number."),
     size: int = Query(default=20, ge=1, le=100, description="Lessons per page."),
 ):
-    filtered_lessons = LESSONS
-    if category_id is not None:
-        if not get_category(category_id):
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Lesson category not found.",
-            )
-        filtered_lessons = [
-            lesson for lesson in LESSONS if lesson["category_id"] == category_id
-        ]
+    try:
+        category_collection, lesson_collection = ensure_default_lesson_data()
+        category_documents = list(category_collection.find({}).sort("sort_order", ASCENDING))
+        categories = [convert_category_document(category) for category in category_documents]
 
-    sorted_lessons = sorted(
-        filtered_lessons,
-        key=lambda lesson: (lesson["category_id"], lesson["sort_order"], lesson["lesson_id"]),
-    )
-    total = len(sorted_lessons)
-    start = (page - 1) * size
-    end = start + size
+        mongo_query = {}
+        if category_id is not None:
+            category = category_collection.find_one({"category_id": category_id})
+            if category is None:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Lesson category not found.",
+                )
+            mongo_query["category_id"] = category_id
+
+        total = lesson_collection.count_documents(mongo_query)
+        start = (page - 1) * size
+        lesson_documents = list(
+            lesson_collection.find(mongo_query)
+            .sort([("category_id", ASCENDING), ("sort_order", ASCENDING), ("lesson_id", ASCENDING)])
+            .skip(start)
+            .limit(size)
+        )
+    except HTTPException:
+        raise
+    except PyMongoError as error:
+        raise HTTPException(status_code=500, detail=f"Lesson MongoDB read failed: {error}")
 
     return LessonListResponseSchema(
-        categories=sorted(LESSON_CATEGORIES, key=lambda category: category["sort_order"]),
+        categories=categories,
         lessons=[
-            LessonSummarySchema(
-                lesson_id=lesson["lesson_id"],
-                category_id=lesson["category_id"],
-                word=lesson["word"],
-                sort_order=lesson["sort_order"],
-            )
-            for lesson in sorted_lessons[start:end]
+            LessonSummarySchema(**convert_lesson_summary_document(lesson))
+            for lesson in lesson_documents
         ],
         selected_category_id=category_id,
         page=page,
@@ -132,28 +195,24 @@ async def read_lessons(
     status_code=status.HTTP_200_OK,
 )
 async def read_lesson_detail(lesson_id: int):
-    lesson = get_lesson(lesson_id)
-    if not lesson:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Lesson not found.",
-        )
+    try:
+        category_collection, lesson_collection = ensure_default_lesson_data()
+        lesson = lesson_collection.find_one({"lesson_id": lesson_id})
+        if lesson is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Lesson not found.",
+            )
 
-    category = get_category(lesson["category_id"])
-    if not category:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Lesson category not found.",
-        )
+        category = category_collection.find_one({"category_id": to_int(lesson.get("category_id"))})
+        if category is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Lesson category not found.",
+            )
+    except HTTPException:
+        raise
+    except PyMongoError as error:
+        raise HTTPException(status_code=500, detail=f"Lesson MongoDB read failed: {error}")
 
-    return LessonDetailSchema(
-        lesson_id=lesson["lesson_id"],
-        category_id=lesson["category_id"],
-        category_name=category["name"],
-        word=lesson["word"],
-        video_url=lesson["video_url"],
-        video_type=lesson["video_type"],
-        description=lesson["description"],
-        ai_model_key=lesson["ai_model_key"],
-        sort_order=lesson["sort_order"],
-    )
+    return LessonDetailSchema(**convert_lesson_detail_document(lesson, category))

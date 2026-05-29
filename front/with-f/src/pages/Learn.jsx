@@ -5,7 +5,7 @@ import './Learn.css';
 const API_BASE_URL = 'http://127.0.0.1:8000/api/v1';
 
 const fallbackCategories = [
-  { category_id: 1, name: '인사', icon: 'person', description: '', sort_order: 1 },
+  { category_id: 1, name: '인사', icon: 'fi fi-br-hand-paper', description: '', sort_order: 1 },
   { category_id: 2, name: '일상생활', icon: 'hands', description: '', sort_order: 2 },
   { category_id: 3, name: '가족', icon: 'family', description: '', sort_order: 3 },
   { category_id: 4, name: '학교/직장', icon: 'school', description: '', sort_order: 4 },
