@@ -20,8 +20,13 @@ db = client.get_default_database()
 # ==========================================
 # [MongoDB 공용 컬렉션 창구] - 주석 해제 (init용)
 # ==========================================
-def get_mongo_collection():
-    return db["recognition_logs"]
+def get_mongo_collection(collection_name: str = "recognition_logs"):
+    return db[collection_name]
+
+
+def get_dictionary_collection():
+    # 수어표현검색 데이터가 저장되는 MongoDB 컬렉션입니다.
+    return db["Dictionary"]
 
 
 # ==========================================
