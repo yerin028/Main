@@ -51,7 +51,7 @@
 
 .payment-plan-title {
   display: flex;
-  min-height: 70px;
+  min-height: 96px;
   flex-direction: column;
   justify-content: center;
   color: #062a61;
@@ -61,9 +61,13 @@
   text-shadow: 0 3px 0 rgba(6, 42, 97, 0.12);
 }
 
+.payment-plan-title-lowered {
+  transform: translateY(12px);
+}
+
 .payment-price-box {
   display: flex;
-  min-height: 93px;
+  min-height: 102px;
   align-items: center;
   justify-content: center;
   gap: 6px;

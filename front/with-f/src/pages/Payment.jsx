@@ -226,7 +226,11 @@ function Payment() {
               disabled={isDisabled}
               onClick={() => handlePlanClick(paymentPlan)}
             >
-              <span className="payment-plan-title">
+              <span
+                className={`payment-plan-title ${
+                  paymentPlan.id !== "special-three-month" ? "payment-plan-title-lowered" : ""
+                }`}
+              >
                 {paymentPlan.title.split("\n").map((titleLine) => (
                   <span key={titleLine}>{titleLine}</span>
                 ))}
