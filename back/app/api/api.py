@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.api.v1.endpoints import auth, interpreter, lessons, payment, quiz
+from app.api.v1.endpoints import auth, cs, interpreter, lessons, payment, quiz, refund
 
 api_router = APIRouter()
 
@@ -17,3 +17,5 @@ api_router.include_router(
 )
 api_router.include_router(payment.router, prefix="/payment", tags=["payment"])
 api_router.include_router(quiz.router, prefix="/quiz", tags=["quiz"])
+api_router.include_router(cs.router, prefix="/cs", tags=["cs"])
+api_router.include_router(refund.router, prefix="/refunds", tags=["refunds"])

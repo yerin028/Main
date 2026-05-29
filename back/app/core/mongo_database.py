@@ -13,7 +13,12 @@ if not MONGODB_URI:
     raise ValueError("MONGODB_URI를 .env 파일에서 찾을 수 없습니다!")
 
 # 2. 클라우드 MongoDB 접속 엔진 설정
-client = MongoClient(MONGODB_URI)
+client = MongoClient(
+    MONGODB_URI,
+    serverSelectionTimeoutMS=3000,
+    connectTimeoutMS=3000,
+    socketTimeoutMS=3000,
+)
 db = client.get_default_database()
 
 
