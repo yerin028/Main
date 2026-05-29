@@ -86,6 +86,7 @@ function CustomerService() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           reason: selectedRefundReason,
+          user_id: getCurrentUserId(),
         }),
       });
 
@@ -141,7 +142,7 @@ function CustomerService() {
           ) : (
             questions.map((question, index) => (
               <div className="customer-table-row" key={question.question_id}>
-                <span>{questions.length - index}</span>
+                <span>{index + 1}</span>
                 <span>{question.content}</span>
                 <span>{formatDate(question.created_at)}</span>
                 <span>
