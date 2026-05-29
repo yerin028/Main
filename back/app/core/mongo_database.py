@@ -29,6 +29,11 @@ def get_dictionary_collection():
     return db["Dictionary"]
 
 
+def get_interpreter_collection():
+    # 수어통역 실행 기록이 저장되는 MongoDB 컬렉션입니다.
+    return db["interpreter_log"]
+
+
 # ==========================================
 # [MongoDB 데이터 삽입 기능 가이드] - 내부 주석화
 # ==========================================
