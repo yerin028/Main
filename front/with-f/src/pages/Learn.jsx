@@ -35,8 +35,9 @@ const getCurrentUserId = () => {
 function FingerGuide({ onOpen }) {
   return (
     <section className="learn-finger-guide" aria-label="손가락 번호 안내">
-      <button className="learn-finger-button" type="button" onClick={onOpen}>
-        손가락 번호 안내 보기
+      <button className="learn-finger-button" type="button" onClick={onOpen} aria-label="손가락 번호 안내 보기">
+        손가락<br />
+        안내
       </button>
     </section>
   );
@@ -232,7 +233,10 @@ function Learn() {
   if (!categoryIdFromUrl) {
     return (
       <section className="learn-page learn-category-page">
-        <h1 className="learn-category-title">학습 카테고리</h1>
+        <div className="learn-category-header">
+          <h1 className="learn-category-title">학습 카테고리</h1>
+          <FingerGuide onOpen={() => setIsFingerGuideOpen(true)} />
+        </div>
 
         <div className="learn-category-grid" aria-label="수어학습 카테고리">
           {categories.map((category) => (
@@ -247,8 +251,6 @@ function Learn() {
             </button>
           ))}
         </div>
-
-        <FingerGuide onOpen={() => setIsFingerGuideOpen(true)} />
 
         {isFingerGuideOpen && (
           <div
@@ -274,7 +276,7 @@ function Learn() {
               <img
                 className="learn-finger-modal-image"
                 src="/assets/finger-guide.webp"
-                alt="1지는 집게손가락, 2지는 가운데손가락, 3지는 약손가락, 4지는 새끼손가락, 5지는 엄지손가락을 뜻하는 손가락 번호 안내"
+                alt="1지는 집게손가락, 2지는 가운데손가락, 3지는 약지손가락, 4지는 새끼손가락, 5지는 엄지손가락을 뜻하는 손가락 번호 안내"
               />
             </div>
           </div>

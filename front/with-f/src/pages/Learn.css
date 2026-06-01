@@ -15,10 +15,18 @@
   padding: 0;
 }
 
+.learn-category-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
 .learn-category-title {
   font-size: 30px;
   line-height: 1;
-  margin-bottom: 22px;
+  margin: 0;
   font-weight: 900;
 }
 
@@ -120,23 +128,24 @@
 }
 
 .learn-finger-guide {
-  margin-top: 46px;
-  display: flex;
-  justify-content: center;
+  position: fixed;
+  right: 28px;
+  bottom: 28px;
+  z-index: 10;
 }
 
 .learn-finger-button {
-  min-width: 210px;
-  height: 46px;
-  border: 1px solid var(--learn-line);
-  border-radius: 6px;
+  width: 58px;
+  height: 58px;
+  border: 1px solid var(--learn-navy);
+  border-radius: 50%;
   background: var(--learn-navy);
-  color: var(--learn-navy);
   cursor: pointer;
-  padding: 0 22px;
+  padding: 0 6px;
   color: #ffffff;
   font: inherit;
-  font-size: 16px;
+  font-size: 10px;
+  line-height: 1.15;
   font-weight: 900;
   transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
 }
@@ -525,12 +534,10 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .learn-finger-guide {
-    margin-top: 36px;
-  }
-
   .learn-finger-button {
-    min-width: 190px;
+    width: 54px;
+    height: 54px;
+    font-size: 9px;
   }
 
   .learn-study-main {
@@ -547,12 +554,15 @@
     grid-template-columns: 1fr;
   }
 
-  .learn-finger-guide {
-    margin-top: 32px;
+  .learn-category-header {
+    align-items: flex-start;
   }
 
   .learn-finger-button {
-    width: 100%;
+    width: 50px;
+    height: 50px;
+    padding: 0 5px;
+    font-size: 8px;
   }
 
   .learn-modal-backdrop {
