@@ -37,6 +37,21 @@
     transition: all 0.2s;
 }
 
+.home-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(26, 46, 85, 0.08);
+}
+
+.home-card.disabled {
+    cursor: default;
+    opacity: 0.72;
+}
+
+.home-card.disabled:hover {
+    transform: none;
+    box-shadow: none;
+}
+
 .home-card-icon {
     font-size: 36px;
     background-color: #eef1f8;

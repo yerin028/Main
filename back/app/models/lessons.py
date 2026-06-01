@@ -24,6 +24,9 @@ class LessonDocument(BaseModel):
     description: str | None = Field(default=None, description="Lesson explanation.")
     ai_model_key: str | None = Field(default=None, description="Future AI model or prompt key.")
     sort_order: int = Field(default=0, description="Display order in category.")
+    source: str | None = Field(default=None, description="Data source, such as sign_api.")
+    api_keyword: str | None = Field(default=None, description="Keyword used for source API sync.")
+    synced_at: datetime | None = Field(default=None, description="External API sync time.")
     created_at: datetime | None = Field(default=None, description="Document creation time.")
     updated_at: datetime | None = Field(default=None, description="Document update time.")
 
