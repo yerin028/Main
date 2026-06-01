@@ -114,3 +114,19 @@ def create_refund(
         ) from error
 
     return serialize_refund(document)
+
+
+@router.get(
+    "",
+    response_model=list[RefundSchema],
+    status_code=status.HTTP_200_OK,
+)
+def read_refunds():
+    try:
+        documents = get_refund_collection().find({}).sort("refund_id", 1)
+        return [serialize_refund(document) for document in documents]
+    except PyMongoError as error:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to read refunds: {error}",
+        ) from error
