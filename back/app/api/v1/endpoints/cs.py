@@ -52,34 +52,65 @@ def get_user_snapshot(db: Session, user_id: int | None):
     }
 
 
-def serialize_answer(document):
+def get_optional_user_snapshot(db: Session | None, user_id: int | None):
+    if db is None or user_id is None:
+        return {}
+
+    user = db.query(User).filter(User.user_id == user_id).first()
+    if not user:
+        return {"user_id": user_id}
+
+    return {
+        "user_id": user.user_id,
+        "user_name": user.name,
+        "user_email": user.email,
+    }
+
+
+def get_document_user_snapshot(document, db: Session | None = None):
+    user_snapshot = {
+        "user_id": document.get("user_id"),
+        "user_name": document.get("user_name"),
+        "user_email": document.get("user_email"),
+    }
+
+    if user_snapshot["user_id"] and not (user_snapshot["user_name"] or user_snapshot["user_email"]):
+        user_snapshot.update(get_optional_user_snapshot(db, user_snapshot["user_id"]))
+
+    return user_snapshot
+
+
+def serialize_answer(document, db: Session | None = None):
+    user_snapshot = get_document_user_snapshot(document, db)
+
     return CSAnswerSchema(
         answer_id=int(document.get("answer_id", 0)),
         content=document.get("content") or "",
         created_at=document.get("created_at"),
-        user_id=document.get("user_id"),
-        user_name=document.get("user_name"),
-        user_email=document.get("user_email"),
+        user_id=user_snapshot.get("user_id"),
+        user_name=user_snapshot.get("user_name"),
+        user_email=user_snapshot.get("user_email"),
         question_id=document.get("question_id"),
     )
 
 
-def get_answers(question_id: int):
+def get_answers(question_id: int, db: Session | None = None):
     documents = get_answer_collection().find({"question_id": question_id}).sort("answer_id", 1)
-    return [serialize_answer(document) for document in documents]
+    return [serialize_answer(document, db) for document in documents]
 
 
-def serialize_question(document):
+def serialize_question(document, db: Session | None = None):
     question_id = int(document.get("question_id", 0))
-    answers = get_answers(question_id)
+    answers = get_answers(question_id, db)
+    user_snapshot = get_document_user_snapshot(document, db)
 
     return CSQuestionSchema(
         question_id=question_id,
         content=document.get("content") or document.get("title") or "",
         created_at=document.get("created_at"),
-        user_id=document.get("user_id"),
-        user_name=document.get("user_name"),
-        user_email=document.get("user_email"),
+        user_id=user_snapshot.get("user_id"),
+        user_name=user_snapshot.get("user_name"),
+        user_email=user_snapshot.get("user_email"),
         answer_status="답변 완료" if answers else "답변 대기",
         answers=answers,
     )
@@ -129,10 +160,10 @@ def create_question(
     response_model=list[CSQuestionSchema],
     status_code=status.HTTP_200_OK,
 )
-def read_questions():
+def read_questions(db: Session = Depends(get_db)):
     try:
         documents = get_question_collection().find({}).sort("question_id", 1)
-        return [serialize_question(document) for document in documents]
+        return [serialize_question(document, db) for document in documents]
     except PyMongoError as error:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -182,4 +213,4 @@ def create_answer(
             detail=f"Failed to create answer: {error}",
         ) from error
 
-    return serialize_answer(document)
+    return serialize_answer(document, db)

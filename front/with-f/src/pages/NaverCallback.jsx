@@ -18,6 +18,15 @@ function NaverCallback() {
         .then(res => res.json())
         .then(data => {
             console.log('네이버 로그인 성공:', data);
+            if (data.user_id) {
+                localStorage.setItem("user_id", String(data.user_id));
+            }
+            if (data.nickname) {
+                localStorage.setItem("user_name", data.nickname);
+            }
+            if (data.email) {
+                localStorage.setItem("user_email", data.email);
+            }
             navigate('/home');
         })
         .catch(err => {
