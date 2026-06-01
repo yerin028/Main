@@ -3,6 +3,8 @@
   width: min(1500px, 100%);
   margin: 0 auto;
   color: #071631;
+  transform: scale(0.75);
+  transform-origin: top center;
 }
 
 .admin-page-title {
@@ -124,7 +126,7 @@
 }
 
 .admin-refund-row {
-  grid-template-columns: 90px 145px 240px minmax(180px, 1fr) 250px 120px 230px;
+  grid-template-columns: 90px 145px 240px minmax(140px, 1fr) 250px 160px 300px;
 }
 
 .admin-question-row:last-child,
@@ -143,6 +145,23 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.admin-refund-row > span {
+  text-align: center;
+}
+
+.admin-refund-row > span:nth-child(6) {
+  display: flex;
+  justify-content: center;
+  overflow: visible;
+  text-overflow: clip;
+}
+
+.admin-refund-row .admin-status-badge {
+  min-width: 90px;
+  min-height: 42px;
+  padding: 0 12px;
 }
 
 .admin-question-row > span:nth-child(4) {
@@ -187,6 +206,12 @@
   font-weight: 800;
   padding: 0 16px;
   white-space: nowrap;
+}
+
+.admin-status-badge-complete {
+  border-color: #b8ddc8;
+  background: #e9f7ef;
+  color: #0f6b3e;
 }
 
 .admin-detail-title {
@@ -305,9 +330,10 @@
 
 .admin-action-buttons {
   display: flex;
-  gap: 24px;
+  gap: 28px;
   align-items: center;
-  padding: 0 16px;
+  justify-content: center;
+  padding: 0 16px 0 46px;
 }
 
 .admin-action-buttons button {

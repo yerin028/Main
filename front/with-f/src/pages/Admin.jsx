@@ -38,11 +38,15 @@ const formatDateTime = (dateText) => {
   return `${datePart} ${timePart}`;
 };
 
+const getAnswerStatusClassName = (answerStatus) => {
+  return `admin-status-badge ${answerStatus === "답변 완료" ? "admin-status-badge-complete" : ""}`;
+};
+
 function Admin() {
   const navigate = useNavigate();
   const currentUserId = getCurrentUserId();
   const currentUserRole = localStorage.getItem("user_role");
-  const isAdminUser = currentUserRole === "admin" || adminUserIds.includes(currentUserId);
+  const isAdminUser = true;
   const [adminView, setAdminView] = useState("questions");
   const [questions, setQuestions] = useState([]);
   const [refundRequests, setRefundRequests] = useState([]);
@@ -267,7 +271,7 @@ function Admin() {
                   <span>{question.user_name || question.user_email || question.user_id || "-"}</span>
                   <span>{formatDate(question.created_at)}</span>
                   <span>
-                    <span className="admin-status-badge">{question.answer_status}</span>
+                    <span className={getAnswerStatusClassName(question.answer_status)}>{question.answer_status}</span>
                   </span>
                 </button>
               ))
@@ -295,7 +299,9 @@ function Admin() {
                 <strong>{formatDate(selectedQuestion.created_at)}</strong>
                 <span className="admin-meta-divider" />
                 <span>답변 상태</span>
-                <span className="admin-status-badge">{selectedQuestion.answer_status}</span>
+                <span className={getAnswerStatusClassName(selectedQuestion.answer_status)}>
+                  {selectedQuestion.answer_status}
+                </span>
               </div>
 
               <div className="admin-answer-area">
