@@ -1,14 +1,46 @@
 // 홈
-
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import './Home.css';
 
+const API_BASE_URL = 'http://127.0.0.1:8000/api/v1';
+
+const getCurrentUserId = () => {
+    const userId = Number(localStorage.getItem('user_id'));
+    return Number.isFinite(userId) && userId > 0 ? userId : null;
+};
+
 function Home() {
     const navigate = useNavigate();
+    const [lastLessonProgress, setLastLessonProgress] = useState(null);
 
     const handleLogout = () => {
         //이게 뭔디
         navigate('/');
+    };
+
+    useEffect(() => {
+        const userId = getCurrentUserId();
+        if (!userId) return;
+
+        const loadLastLessonProgress = async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}/lessons/progress/latest?user_id=${userId}`);
+                if (!response.ok) return;
+
+                const data = await response.json();
+                setLastLessonProgress(data);
+            } catch {
+                setLastLessonProgress(null);
+            }
+        };
+
+        loadLastLessonProgress();
+    }, []);
+
+    const goToLastLesson = () => {
+        if (!lastLessonProgress?.category_id) return;
+        navigate(`/learn?category_id=${lastLessonProgress.category_id}`);
     };
 
     return (
@@ -38,11 +70,18 @@ function Home() {
                 </div>
 
                 {/* 마지막 학습 단어 */}
-                <div className="home-card">
+                <div
+                    className={`home-card ${lastLessonProgress ? '' : 'disabled'}`}
+                    onClick={goToLastLesson}
+                >
                     <div className="home-card-icon">📖</div>
                     <div className="home-card-content">
                         <h3>마지막으로 학습한 단어</h3>
-                        <p>마지막으로 학습한 단어의 영상/카테고리/단어이름을 나열합니다.</p>
+                        <p>
+                            {lastLessonProgress
+                                ? `${lastLessonProgress.category_name ?? '수어학습'} · ${lastLessonProgress.word ?? '저장된 단어'}부터 이어가기`
+                                : '저장된 학습 기록이 없습니다.'}
+                        </p>
                     </div>
                 </div>
 
@@ -63,5 +102,6 @@ function Home() {
         </div>
     );
 }
+
 
 export default Home;

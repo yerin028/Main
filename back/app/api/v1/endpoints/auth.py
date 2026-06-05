@@ -1,7 +1,11 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 import httpx
 import os
+import uuid
 from dotenv import load_dotenv
+from sqlalchemy.orm import Session
+from app.core.mysql_database import get_db
+from app.models.users import User
 
 load_dotenv()
 
@@ -24,9 +28,32 @@ GOOGLE_REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI")
 print("CLIENT_ID:", VITE_KAKAO_CLIENT_ID)
 print("REDIRECT_URI:", VITE_KAKAO_REDIRECT_URI)
 
+def save_or_get_user(db: Session, social_provider: str, social_id: str, name: str, email: str = None):
+    # 이미 가입한 유저인지 확인
+    existing_user = db.query(User).filter(
+        User.social_id == social_id,
+        User.social_provider == social_provider
+    ).first()
+
+    if existing_user:
+        return existing_user
+
+    # 최초 가입 시 새 유저 생성
+    new_user = User(
+        social_provider=social_provider,
+        social_id=social_id,
+        name=name,
+        email=email,
+        customer_key=str(uuid.uuid4())
+    )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return new_user
+
 # 카카오
 @router.post("/login/kakao")
-async def kakao_login(code:str):
+async def kakao_login(code: str, db: Session = Depends(get_db)):
     # 1. 카카오에서 토큰 받기
     token_response  =await httpx.AsyncClient().post(
         "https://kauth.kakao.com/oauth/token",
@@ -62,12 +89,13 @@ async def kakao_login(code:str):
         .get("nickname")
     )
 
-    return {"kakao_id": kakao_id, "nickname": nickname}
+    user = save_or_get_user(db, "kakao", kakao_id, nickname)
+    return {"user_id": user.user_id, "kakao_id": kakao_id, "nickname": nickname}
 
 
 # 네이버
 @router.post("/login/naver")
-async def naver_login(code: str, state: str):
+async def naver_login(code: str, state: str, db: Session = Depends(get_db)):
     # 1. 네이버에서 토큰 받기
     async with httpx.AsyncClient() as client:
         token_response = await client.post(
@@ -99,12 +127,13 @@ async def naver_login(code: str, state: str):
         nickname = user_data.get("response", {}).get("nickname")
         email = user_data.get("response", {}).get("email")
 
-        return {"naver_id": naver_id, "nickname": nickname, "email": email}
+        user = save_or_get_user(db, "naver", naver_id, nickname, email)
+        return {"user_id": user.user_id, "naver_id": naver_id, "nickname": nickname, "email": email}
     
 
 # 구글
 @router.post("/login/google")
-async def google_login(code: str):
+async def google_login(code: str, db: Session = Depends(get_db)):
     # 1. 구글에서 토큰 받기
     async with httpx.AsyncClient() as client:
         token_response = await client.post(
@@ -134,4 +163,5 @@ async def google_login(code: str):
     email = user_data.get("email")
     nickname = user_data.get("name")
 
-    return {"google_id": google_id, "email": email, "nickname": nickname}
+    user = save_or_get_user(db, "google", google_id, nickname, email)
+    return {"user_id": user.user_id, "google_id": google_id, "email": email, "nickname": nickname}
