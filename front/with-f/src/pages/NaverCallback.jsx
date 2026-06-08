@@ -18,6 +18,7 @@ function NaverCallback() {
         .then(res => res.json())
         .then(data => {
             console.log('네이버 로그인 성공:', data);
+            localStorage.setItem('user_id', data.user_id);
             navigate('/home');
         })
         .catch(err => {
