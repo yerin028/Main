@@ -1,6 +1,6 @@
 // 홈
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import './Home.css';
 
 const API_BASE_URL = 'http://127.0.0.1:8000/api/v1';
@@ -12,10 +12,11 @@ const getCurrentUserId = () => {
 
 function Home() {
     const navigate = useNavigate();
+    const location = useLocation();
     const [lastLessonProgress, setLastLessonProgress] = useState(null);
+    const [todayStats, setTodayStats] = useState({ studied_count: 0, percent: 0 });
 
     const handleLogout = () => {
-        //이게 뭔디
         navigate('/');
     };
 
@@ -27,7 +28,6 @@ function Home() {
             try {
                 const response = await fetch(`${API_BASE_URL}/lessons/progress/latest?user_id=${userId}`);
                 if (!response.ok) return;
-
                 const data = await response.json();
                 setLastLessonProgress(data);
             } catch {
@@ -35,8 +35,20 @@ function Home() {
             }
         };
 
+        const loadTodayStats = async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}/lessons/progress/today-stats?user_id=${userId}`);
+                if (!response.ok) return;
+                const data = await response.json();
+                setTodayStats(data);
+            } catch {
+                setTodayStats({ studied_count: 0, percent: 0 });
+            }
+        };
+
         loadLastLessonProgress();
-    }, []);
+        loadTodayStats();
+    }, [location]);
 
     const goToLastLesson = () => {
         if (!lastLessonProgress?.category_id) return;
@@ -49,7 +61,7 @@ function Home() {
                 <h2>안녕하세요</h2>
                 <p>오늘도 수어로 소통해요</p>
             </div>
-            
+
             <div className="home-cards">
                 {/* 수어 통역 이동 */}
                 <div className="home-card" onClick={() => navigate('/interpreter')}>
@@ -65,7 +77,13 @@ function Home() {
                     <div className="home-card-icon">📊</div>
                     <div className="home-card-content">
                         <h3>학습 현황</h3>
-                        <p>오늘의 진도율을 그래프 및 퍼센트로 시작합니다.</p>
+                        <p>오늘 학습한 단어 {todayStats.studied_count}개</p>
+                        <div className="progress-bar-wrapper">
+                            <div
+                                className="progress-bar-fill"
+                                style={{ width: `${todayStats.percent}%` }}
+                            />
+                        </div>
                     </div>
                 </div>
 
@@ -102,6 +120,5 @@ function Home() {
         </div>
     );
 }
-
 
 export default Home;
