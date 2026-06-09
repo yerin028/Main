@@ -5,6 +5,7 @@ import { useLocation } from 'react-router-dom'; // 현재 route 정보와 naviga
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000'; // 백엔드 API 주소
 const categoryPageSize = 6; // 카테고리 한 페이지 표시 개수
 const wordPageSize = 5; // 단어 한 페이지 표시 개수
+const pageJumpSize = 5; // <<, >> buttons move 5 pages at once
 
 // 수어 API가 http sldict 영상 주소를 내려주면 브라우저에서 안정적으로 불러올 수 있게 https 주소로 바꿉니다.
 // 일부 영상은 krdicmedia 호스트에서는 400 오류가 나지만, https sldict 주소에서는 정상 재생됩니다.
@@ -531,6 +532,14 @@ function Dictionary() {
               &lt;
             </button>
             {/* 페이지가 많으면 현재 페이지 주변 번호와 생략 표시만 보여줍니다. */}
+            <button
+              type="button"
+              aria-label="Jump back 5 pages"
+              disabled={categoryPage === 1}
+              onClick={() => setCategoryPage(Math.max(1, categoryPage - pageJumpSize))}
+            >
+              &lt;&lt;
+            </button>
             {categoryPaginationItems.map((pageItem) =>
               typeof pageItem === 'number' ? (
                 <button
@@ -551,6 +560,14 @@ function Dictionary() {
               )
             )}
             {/* 다음 카테고리 페이지로 이동하는 버튼입니다. */}
+            <button
+              type="button"
+              aria-label="Jump forward 5 pages"
+              disabled={categoryPage === totalCategoryPages}
+              onClick={() => setCategoryPage(Math.min(totalCategoryPages, categoryPage + pageJumpSize))}
+            >
+              &gt;&gt;
+            </button>
             <button
               type="button"
               // 마지막 페이지에서는 다음 버튼을 비활성화합니다.
@@ -679,6 +696,14 @@ function Dictionary() {
                 &lt;
               </button>
               {/* 페이지가 많으면 현재 페이지 주변 번호와 생략 표시만 보여줍니다. */}
+              <button
+                type="button"
+                aria-label="Jump back 5 pages"
+                disabled={wordPage === 1}
+                onClick={() => setWordPage(Math.max(1, wordPage - pageJumpSize))}
+              >
+                &lt;&lt;
+              </button>
               {wordPaginationItems.map((pageItem) =>
                 typeof pageItem === 'number' ? (
                   <button
@@ -699,6 +724,14 @@ function Dictionary() {
                 )
               )}
               {/* 다음 단어 페이지로 이동하는 버튼입니다. */}
+              <button
+                type="button"
+                aria-label="Jump forward 5 pages"
+                disabled={wordPage === totalWordPages}
+                onClick={() => setWordPage(Math.min(totalWordPages, wordPage + pageJumpSize))}
+              >
+                &gt;&gt;
+              </button>
               <button
                 type="button"
                 // 마지막 페이지에서는 다음 버튼을 비활성화합니다.
