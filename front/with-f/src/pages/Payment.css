@@ -51,11 +51,7 @@
 
 .payment-plan-title {
   display: flex;
-<<<<<<< HEAD
   min-height: 96px;
-=======
-  min-height: 69px;
->>>>>>> 1f5f6b5d84148908eab9af7fafbbeb5ee21b4cd4
   flex-direction: column;
   justify-content: center;
   color: #062a61;
@@ -66,20 +62,12 @@
 }
 
 .payment-plan-title-lowered {
-<<<<<<< HEAD
   transform: translateY(12px);
-=======
-  transform: translateY(19px);
->>>>>>> 1f5f6b5d84148908eab9af7fafbbeb5ee21b4cd4
 }
 
 .payment-price-box {
   display: flex;
-<<<<<<< HEAD
   min-height: 102px;
-=======
-  min-height: 75px;
->>>>>>> 1f5f6b5d84148908eab9af7fafbbeb5ee21b4cd4
   align-items: center;
   justify-content: center;
   gap: 5px;

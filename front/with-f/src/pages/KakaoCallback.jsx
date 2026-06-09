@@ -17,6 +17,7 @@ function KakaoCallback() {
           .then(res => res.json())
           .then(data => {
             console.log('로그인 성공:', data);
+            localStorage.setItem('user_id', data.user_id);
             navigate('/home');
           })
           .catch(err => {

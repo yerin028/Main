@@ -240,24 +240,25 @@
 }
 
 .customer-checkbox {
-  width: 25px;
-  height: 25px;
-  border: 3px solid #062a61;
-  border-radius: 6px;
+  width: 20px;
+  height: 20px;
+  border: 2.5px solid #062a61;
+  border-radius: 5px;
   background: #ffffff;
   position: relative;
+  flex-shrink: 0;
 }
 
 .customer-refund-option input:checked + .customer-checkbox::after {
   content: "";
   position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 12px;
-  height: 16px;
-  border-right: 4px solid #062a61;
-  border-bottom: 4px solid #062a61;
-  transform: translate(-50%, -58%) rotate(45deg);
+  left: 52%;
+  top: 47%;
+  width: 7px;
+  height: 11px;
+  border-right: 3px solid #062a61;
+  border-bottom: 3px solid #062a61;
+  transform: translate(-50%, -50%) rotate(45deg);
 }
 
 .customer-modal-actions {
@@ -268,10 +269,11 @@
 
 .customer-modal-actions button {
   height: 55px;
+  font-size: 17px;
 }
 
 .customer-modal-submit {
-  font-size: 19px;
+  font-size: 17px;
 }
 
 @media (max-width: 900px) {
