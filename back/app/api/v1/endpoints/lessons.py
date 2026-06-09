@@ -336,7 +336,7 @@ async def save_lesson_progress(progress_create: LessonProgressSaveSchema):
         get_lesson_progress_collection().update_one(
             {
                 "user_id": progress_create.user_id,
-                "category_id": progress_create.category_id,
+                "lesson_id": progress_create.lesson_id,
             },
             {"$set": progress_document},
             upsert=True,
@@ -384,3 +384,29 @@ async def read_lesson_detail(lesson_id: int):
         raise HTTPException(status_code=500, detail=f"Lesson MongoDB read failed: {error}")
 
     return LessonDetailSchema(**convert_lesson_detail_document(lesson, category))
+
+@router.get("/progress/today-stats")
+async def get_today_progress_stats(user_id: int = Query(...)):
+    try:
+        progress_collection = get_lesson_progress_collection()
+
+        # 한국 시간 기준 오늘 날짜
+        from datetime import timedelta
+        korea_now = datetime.now(timezone.utc) + timedelta(hours=9)
+        today = korea_now.strftime("%Y-%m-%d")
+
+        all_progress = list(progress_collection.find({"user_id": user_id}))
+
+        today_progress = [
+            p for p in all_progress
+            if p.get("updated_at", "")[:10] == today
+        ]
+
+        studied_count = len(today_progress)
+
+        return {
+            "studied_count": studied_count,
+            "percent": min(round(studied_count / 50 * 100), 100)
+        }
+    except PyMongoError as error:
+        raise HTTPException(status_code=500, detail=f"MongoDB read failed: {error}")
