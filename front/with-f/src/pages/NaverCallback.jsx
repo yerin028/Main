@@ -13,16 +13,22 @@ function NaverCallback() {
         const state = new URL(window.location.href).searchParams.get('state');
 
         fetch(`http://localhost:8000/api/v1/auth/login/naver?code=${code}&state=${state}`, {
-      method: 'POST',
-    })
-        .then(res => res.json())
+            method: 'POST',
+        })
+        .then(res => {
+            if (!res.ok) {
+                return res.json().then(err => { throw new Error(err.detail); });
+            }
+            return res.json();
+        })
         .then(data => {
             console.log('네이버 로그인 성공:', data);
             localStorage.setItem('user_id', data.user_id);
             navigate('/home');
         })
         .catch(err => {
-            console.error('네이버 로그인 실패:', err);
+            alert(err.message || '로그인 실패');
+            navigate('/');
         });
     }, []);
 

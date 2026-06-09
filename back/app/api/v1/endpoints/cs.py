@@ -8,6 +8,7 @@ from app.core.mongo_database import get_mongo_collection
 from app.core.mysql_database import get_db
 from app.models.cs import CS_ANSWER_COLLECTION, CS_QUESTION_COLLECTION
 from app.models.users import User
+from app.models.withdrawal import UserWithdrawal
 from app.schemas.cs import (
     CSAnswerCreate,
     CSAnswerSchema,
@@ -183,3 +184,36 @@ def create_answer(
         ) from error
 
     return serialize_answer(document)
+
+
+# 탈퇴
+@router.post("/withdraw", status_code=status.HTTP_200_OK)
+def withdraw_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+):
+    user = db.query(User).filter(User.user_id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found.")
+
+    existing = db.query(UserWithdrawal).filter(UserWithdrawal.user_id == user_id).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="이미 탈퇴한 사용자입니다.")
+
+    # 유저 정보 통째로 복사
+    withdrawal = UserWithdrawal(
+        user_id               = user.user_id,
+        email                 = user.email,
+        password              = user.password,
+        social_provider       = user.social_provider,
+        social_id             = user.social_id,
+        name                  = user.name,
+        role                  = user.role,
+        customer_key          = user.customer_key,
+        billing_key           = user.billing_key,
+        subscription_end_date = user.subscription_end_date,
+        created_at            = user.created_at,
+    )
+    db.add(withdrawal)
+    db.commit()
+    return {"message": "탈퇴가 완료되었습니다."}
