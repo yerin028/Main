@@ -63,3 +63,8 @@ class RefundSchema(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class RefundStatusUpdate(BaseModel):
+    refund_id: int
+    status: str

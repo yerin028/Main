@@ -34,6 +34,22 @@ def get_dictionary_collection():
     return db["Dictionary"]
 
 
+
+def get_lesson_categories_collection():
+    # 수어학습 카테고리 데이터가 저장되는 MongoDB 컬렉션입니다.
+    return db["lesson_categories"]
+
+
+def get_lessons_collection():
+    # 수어학습 단어/강의 데이터가 저장되는 MongoDB 컬렉션입니다.
+    return db["lessons"]
+
+def get_interpreter_collection():
+    # 수어통역 실행 기록이 저장되는 MongoDB 컬렉션입니다.
+    return db["interpreter_log"]
+
+
+
 # ==========================================
 # [MongoDB 데이터 삽입 기능 가이드] - 내부 주석화
 # ==========================================
