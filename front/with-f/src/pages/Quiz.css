@@ -52,175 +52,71 @@
 }
 
 .quiz-category-icon {
-  width: 58px;
-  height: 58px;
+  width: 64px;
+  height: 64px;
   position: relative;
-  display: block;
+  display: grid;
+  place-items: center;
+  border: 1px solid #d7e4f7;
+  border-radius: 20px;
+  background: #f5f9ff;
 }
 
-/* Reusing category icons from learn */
-.quiz-category-icon.person::before {
-  content: '';
-  width: 24px;
-  height: 24px;
-  border: 3px solid var(--quiz-navy);
-  border-radius: 50%;
-  position: absolute;
-  top: 0;
-  left: 16px;
+.quiz-category-icon.fi {
+  color: var(--quiz-navy);
+  font-size: 38px;
+  line-height: 1;
 }
-.quiz-category-icon.person::after {
-  content: '';
-  width: 38px;
-  height: 28px;
-  border: 3px solid var(--quiz-navy);
-  border-radius: 24px 24px 8px 8px;
-  position: absolute;
-  bottom: 0;
-  left: 7px;
+
+.quiz-category-icon.fi::before {
+  display: block;
+  line-height: 1;
 }
-.quiz-category-icon.hands::before, .quiz-category-icon.hands::after {
+
+.quiz-category-icon:not(.fi)::before {
   content: '';
-  width: 22px;
-  height: 46px;
-  border: 3px solid var(--quiz-navy);
-  border-radius: 18px 18px 8px 8px;
-  position: absolute;
-  top: 6px;
+  width: 42px;
+  height: 42px;
+  display: block;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
 }
-.quiz-category-icon.hands::before { left: 12px; transform: rotate(-8deg); }
-.quiz-category-icon.hands::after { right: 10px; transform: rotate(8deg); }
+
+.quiz-category-icon.hands::before {
+  /* 일상생활: 집 */
+  background-image: url("data:image/svg+xml,%3Csvg width='42' height='42' viewBox='0 0 42 42' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 20L21 8L36 20' stroke='%23062B67' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M11 18V35H31V18' stroke='%23062B67' stroke-width='4' stroke-linejoin='round'/%3E%3Cpath d='M18 35V25H24V35' stroke='%23062B67' stroke-width='4' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
 
 .quiz-category-icon.family::before {
-  content: '';
-  width: 54px;
-  height: 42px;
-  border: 3px solid var(--quiz-navy);
-  border-top: 0;
-  border-radius: 0 0 20px 20px;
-  position: absolute;
-  bottom: 4px;
-  left: 1px;
-}
-.quiz-category-icon.family::after {
-  content: '';
-  width: 16px;
-  height: 16px;
-  border: 3px solid var(--quiz-navy);
-  border-radius: 50%;
-  box-shadow: 22px 8px 0 -3px #ffffff, 22px 8px 0 0 var(--quiz-navy);
-  position: absolute;
-  top: 2px;
-  left: 8px;
+  /* 가족: 세 사람 */
+  background-image: url("data:image/svg+xml,%3Csvg width='42' height='42' viewBox='0 0 42 42' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='21' cy='12' r='5' stroke='%23062B67' stroke-width='4'/%3E%3Ccircle cx='11' cy='18' r='4' stroke='%23062B67' stroke-width='4'/%3E%3Ccircle cx='31' cy='18' r='4' stroke='%23062B67' stroke-width='4'/%3E%3Cpath d='M11 34V31C11 27 14 24 18 24H24C28 24 31 27 31 31V34' stroke='%23062B67' stroke-width='4' stroke-linecap='round'/%3E%3Cpath d='M4 33V31C4 28 6 26 9 26M38 33V31C38 28 36 26 33 26' stroke='%23062B67' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E");
 }
 
 .quiz-category-icon.school::before {
-  content: '';
-  width: 44px;
-  height: 34px;
-  border: 3px solid var(--quiz-navy);
-  position: absolute;
-  left: 6px;
-  bottom: 5px;
-}
-.quiz-category-icon.school::after {
-  content: '';
-  width: 20px;
-  height: 28px;
-  border: 3px solid var(--quiz-navy);
-  border-bottom: 0;
-  transform: rotate(45deg);
-  position: absolute;
-  top: 6px;
-  left: 18px;
+  /* 학교/직장: 빌딩과 가방 손잡이 */
+  background-image: url("data:image/svg+xml,%3Csvg width='42' height='42' viewBox='0 0 42 42' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M9 36V13H24V36M24 20H34V36' stroke='%23062B67' stroke-width='4' stroke-linejoin='round'/%3E%3Cpath d='M14 19H19M14 26H19M29 26H30M29 31H30M5 36H37' stroke='%23062B67' stroke-width='4' stroke-linecap='round'/%3E%3Cpath d='M14 13V9H24V13' stroke='%23062B67' stroke-width='4' stroke-linejoin='round'/%3E%3C/svg%3E");
 }
 
 .quiz-category-icon.bus::before {
-  content: '';
-  width: 44px;
-  height: 38px;
-  border: 3px solid var(--quiz-navy);
-  border-radius: 8px;
-  position: absolute;
-  left: 5px;
-  top: 8px;
-}
-.quiz-category-icon.bus::after {
-  content: '';
-  width: 8px;
-  height: 8px;
-  border: 3px solid var(--quiz-navy);
-  border-radius: 50%;
-  box-shadow: 28px 0 0 -3px #ffffff, 28px 0 0 0 var(--quiz-navy);
-  position: absolute;
-  left: 12px;
-  bottom: 2px;
+  /* 교통/장소: 위치 핀 */
+  background-image: url("data:image/svg+xml,%3Csvg width='42' height='42' viewBox='0 0 42 42' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M21 38C21 38 33 27 33 17C33 10 28 5 21 5C14 5 9 10 9 17C9 27 21 38 21 38Z' stroke='%23062B67' stroke-width='4' stroke-linejoin='round'/%3E%3Ccircle cx='21' cy='17' r='5' stroke='%23062B67' stroke-width='4'/%3E%3C/svg%3E");
 }
 
 .quiz-category-icon.clock::before {
-  content: '';
-  width: 46px;
-  height: 46px;
-  border: 3px solid var(--quiz-navy);
-  border-radius: 50%;
-  position: absolute;
-  left: 4px;
-  top: 4px;
-}
-.quiz-category-icon.clock::after {
-  content: '';
-  width: 16px;
-  height: 20px;
-  border-left: 3px solid var(--quiz-navy);
-  border-bottom: 3px solid var(--quiz-navy);
-  position: absolute;
-  left: 28px;
-  top: 16px;
+  /* 시간/날짜: 달력 */
+  background-image: url("data:image/svg+xml,%3Csvg width='42' height='42' viewBox='0 0 42 42' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 8V14M32 8V14M7 16H35M9 12H33C35 12 36 13 36 15V33C36 35 35 36 33 36H9C7 36 6 35 6 33V15C6 13 7 12 9 12Z' stroke='%23062B67' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M14 23H16M21 23H23M28 23H30M14 30H16M21 30H23' stroke='%23062B67' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E");
 }
 
 .quiz-category-icon.face::before {
-  content: '';
-  width: 44px;
-  height: 44px;
-  border: 3px solid var(--quiz-navy);
-  border-radius: 50%;
-  position: absolute;
-  left: 5px;
-  top: 4px;
-}
-.quiz-category-icon.face::after {
-  content: '';
-  width: 20px;
-  height: 8px;
-  border-bottom: 3px solid var(--quiz-navy);
-  border-radius: 50%;
-  position: absolute;
-  left: 18px;
-  top: 30px;
+  /* 감정/상태: 표정 */
+  background-image: url("data:image/svg+xml,%3Csvg width='42' height='42' viewBox='0 0 42 42' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='21' cy='21' r='15' stroke='%23062B67' stroke-width='4'/%3E%3Cpath d='M15 17H15.5M26.5 17H27' stroke='%23062B67' stroke-width='5' stroke-linecap='round'/%3E%3Cpath d='M15 26C17 29 19 30 21 30C23 30 25 29 27 26' stroke='%23062B67' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E");
 }
 
 .quiz-category-icon.pen::before {
-  content: '';
-  width: 44px;
-  height: 10px;
-  border: 3px solid var(--quiz-navy);
-  border-radius: 8px;
-  transform: rotate(-65deg);
-  position: absolute;
-  left: 4px;
-  top: 24px;
+  /* 기타: 더보기 */
+  background-image: url("data:image/svg+xml,%3Csvg width='42' height='42' viewBox='0 0 42 42' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='12' cy='21' r='3' stroke='%23062B67' stroke-width='4'/%3E%3Ccircle cx='21' cy='21' r='3' stroke='%23062B67' stroke-width='4'/%3E%3Ccircle cx='30' cy='21' r='3' stroke='%23062B67' stroke-width='4'/%3E%3Cpath d='M9 32H33' stroke='%23062B67' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E");
 }
-.quiz-category-icon.pen::after {
-  content: '';
-  width: 34px;
-  height: 26px;
-  border-right: 3px solid var(--quiz-navy);
-  border-bottom: 3px solid var(--quiz-navy);
-  position: absolute;
-  right: 4px;
-  bottom: 6px;
-}
-
 .quiz-study-page {
   display: flex;
   flex-direction: column;
@@ -649,4 +545,5 @@
 @media (max-width: 560px) {
   .quiz-category-grid { grid-template-columns: 1fr; }
 }
+
 
