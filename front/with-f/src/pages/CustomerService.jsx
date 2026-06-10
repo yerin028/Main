@@ -182,15 +182,18 @@ function CustomerService() {
               </button>
             </div>
 
+            <p className="customer-modal-description">환불 사유를 선택해주세요.</p>
+
             <div className="customer-refund-options">
               {refundReasons.map((refundReason) => (
                 <label className="customer-refund-option" key={refundReason}>
                   <input
-                    type="checkbox"
+                    type="radio"
+                    name="refundReason"
                     checked={selectedRefundReason === refundReason}
                     onChange={() => setSelectedRefundReason(refundReason)}
                   />
-                  <span className="customer-checkbox" aria-hidden="true" />
+                  <span className="customer-radio" aria-hidden="true" />
                   <span>{refundReason}</span>
                 </label>
               ))}

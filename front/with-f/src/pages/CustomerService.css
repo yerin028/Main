@@ -178,30 +178,40 @@
   align-items: center;
   justify-content: center;
   padding: 18px;
-  background: rgba(7, 22, 49, 0.55);
+  background: rgba(7, 22, 49, 0.58);
+  backdrop-filter: blur(2px);
 }
 
 .customer-refund-modal {
-  width: min(452px, 100%);
-  border: 1.5px solid #c8d7ee;
+  width: min(467px, 100%);
+  border: 1px solid #dce4f0;
   border-radius: 13px;
   background: #ffffff;
-  padding: 33px 37px 37px;
+  padding: 40px 37px 37px;
   color: #071631;
-  box-shadow: 0 28px 70px rgba(7, 22, 49, 0.28);
+  box-shadow: 0 28px 70px rgba(7, 22, 49, 0.32);
 }
 
 .customer-modal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 25px;
+  margin-bottom: 22px;
 }
 
 .customer-modal-header h2 {
   margin: 0;
-  font-size: 25px;
+  font-size: 28px;
   font-weight: 900;
+  letter-spacing: 0;
+}
+
+.customer-modal-description {
+  margin: 0 0 24px;
+  color: #52617a;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.35;
 }
 
 .customer-modal-close {
@@ -209,27 +219,40 @@
   height: 32px;
   border: 0;
   background: transparent;
-  color: #062a61;
+  color: #25334a;
   cursor: pointer;
-  font-size: 40px;
-  font-weight: 300;
-  line-height: 0.8;
+  font-size: 38px;
+  font-weight: 200;
+  line-height: 1;
 }
 
 .customer-refund-options {
   display: grid;
-  gap: 21px;
-  margin-bottom: 48px;
+  gap: 14px;
+  margin-bottom: 37px;
 }
 
 .customer-refund-option {
   display: flex;
   align-items: center;
-  gap: 18px;
+  min-height: 74px;
+  gap: 20px;
+  border: 1.5px solid #dfe6f0;
+  border-radius: 8px;
+  padding: 0 26px;
+  background: #ffffff;
   color: #071631;
   cursor: pointer;
-  font-size: 20px;
-  font-weight: 800;
+  font-size: 16px;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(7, 22, 49, 0.04);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.customer-refund-option:hover,
+.customer-refund-option:has(input:checked) {
+  border-color: #8da8d0;
+  box-shadow: 0 4px 14px rgba(7, 22, 49, 0.08);
 }
 
 .customer-refund-option input {
@@ -239,36 +262,32 @@
   opacity: 0;
 }
 
-.customer-checkbox {
+.customer-radio {
   width: 20px;
   height: 20px;
-  border: 2.5px solid #062a61;
-  border-radius: 5px;
+  border: 2px solid #365d99;
+  border-radius: 50%;
   background: #ffffff;
   position: relative;
   flex-shrink: 0;
 }
 
-.customer-refund-option input:checked + .customer-checkbox::after {
+.customer-refund-option input:checked + .customer-radio::after {
   content: "";
   position: absolute;
-  left: 52%;
-  top: 43%;
-  width: 7px;
-  height: 11px;
-  border-right: 3px solid #062a61;
-  border-bottom: 3px solid #062a61;
-  transform: translate(-50%, -50%) rotate(45deg);
+  inset: 4px;
+  border-radius: 50%;
+  background: #062a61;
 }
 
 .customer-modal-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 31px;
+  gap: 22px;
 }
 
 .customer-modal-actions button {
-  height: 55px;
+  height: 52px;
   font-size: 17px;
 }
 
