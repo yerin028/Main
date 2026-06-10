@@ -1,40 +1,44 @@
-import { useState } from "react";
-import Admin from "./Admin";
+import { useEffect, useState } from "react";
 import "./CustomerService.css";
 
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000";
 const refundReasons = ["단순 변심", "서비스 불만족", "다른 서비스 구독"];
-const adminUserIds = ["admin", "admin01", "manager", "user01"];
+
+const formatDate = (dateText) => {
+  if (!dateText) return "";
+
+  return new Date(dateText).toISOString().slice(0, 10).replaceAll("-", ".");
+};
 
 const getCurrentUserId = () => {
-  const storageKeys = [
-    "user_id",
-    "userId",
-    "currentUserId",
-    "loginUserId",
-    "with-user-id",
-  ];
-
-  for (const storageKey of storageKeys) {
-    const savedUserId = localStorage.getItem(storageKey);
-
-    if (savedUserId) {
-      return savedUserId;
-    }
-  }
-
-  return "";
+  const userId = Number(localStorage.getItem("user_id"));
+  return Number.isNaN(userId) ? null : userId;
 };
 
 function CustomerService() {
-  const currentUserId = getCurrentUserId();
-  const isAdminUser = adminUserIds.includes(currentUserId);
-
   const [questionText, setQuestionText] = useState("");
   const [questions, setQuestions] = useState([]);
   const [isRefundModalOpen, setIsRefundModalOpen] = useState(false);
   const [selectedRefundReason, setSelectedRefundReason] = useState("");
 
-  const handleSubmitQuestion = () => {
+  const loadQuestions = async () => {
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/v1/cs/questions`);
+      if (!response.ok) throw new Error("질문 목록을 불러오지 못했습니다.");
+
+      const data = await response.json();
+      setQuestions(data);
+    } catch (error) {
+      console.error(error);
+      setQuestions([]);
+    }
+  };
+
+  useEffect(() => {
+    loadQuestions();
+  }, []);
+
+  const handleSubmitQuestion = async () => {
     const trimmedQuestion = questionText.trim();
 
     if (!trimmedQuestion) {
@@ -42,23 +46,23 @@ function CustomerService() {
       return;
     }
 
-    const today = new Date();
-    const createdAt = [
-      today.getFullYear(),
-      String(today.getMonth() + 1).padStart(2, "0"),
-      String(today.getDate()).padStart(2, "0"),
-    ].join(".");
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/v1/cs/questions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          content: trimmedQuestion,
+          user_id: getCurrentUserId(),
+        }),
+      });
 
-    setQuestions((currentQuestions) => [
-      {
-        id: currentQuestions.length + 1,
-        title: trimmedQuestion,
-        createdAt,
-        status: "답변 대기",
-      },
-      ...currentQuestions,
-    ]);
-    setQuestionText("");
+      if (!response.ok) throw new Error("질문 작성에 실패했습니다.");
+
+      setQuestionText("");
+      await loadQuestions();
+    } catch (error) {
+      alert(error.message);
+    }
   };
 
   const openRefundModal = () => {
@@ -70,19 +74,55 @@ function CustomerService() {
     setIsRefundModalOpen(false);
   };
 
-  const handleRefundSubmit = () => {
+  const handleRefundSubmit = async () => {
     if (!selectedRefundReason) {
       alert("환불 사유를 선택해주세요.");
       return;
     }
 
-    alert("환불 신청이 접수되었습니다.");
-    closeRefundModal();
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/v1/refunds`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          reason: selectedRefundReason,
+          user_id: getCurrentUserId(),
+        }),
+      });
+
+      if (!response.ok) throw new Error("환불 신청에 실패했습니다.");
+
+      alert("환불 신청이 접수되었습니다.");
+      closeRefundModal();
+    } catch (error) {
+      alert(error.message);
+    }
   };
 
-  if (isAdminUser) {
-    return <Admin />;
+  const handleWithdrawClick = async () => {
+  const confirmed = window.confirm("정말 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.");
+  if (!confirmed) return;
+
+  const userId = getCurrentUserId();
+  if (!userId) {
+    alert("로그인 정보가 없습니다.");
+    return;
   }
+
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/v1/cs/withdraw?user_id=${userId}`,
+      { method: "POST" }
+    );
+    if (!response.ok) throw new Error("탈퇴 처리에 실패했습니다.");
+
+    alert("탈퇴가 완료되었습니다.");
+    localStorage.clear();
+    window.location.href = "/";
+  } catch (error) {
+    alert(error.message);
+  }
+};
 
   return (
     <section className="customer-service-page" aria-label="고객센터">
@@ -113,7 +153,7 @@ function CustomerService() {
         <div className="customer-question-table">
           <div className="customer-table-row customer-table-header">
             <span>번호</span>
-            <span>제목</span>
+            <span>질문</span>
             <span>작성일</span>
             <span>답변 상태</span>
           </div>
@@ -121,13 +161,13 @@ function CustomerService() {
           {questions.length === 0 ? (
             <div className="customer-empty-row">작성한 질문이 없습니다.</div>
           ) : (
-            questions.map((question) => (
-              <div className="customer-table-row" key={question.id}>
-                <span>{question.id}</span>
-                <span>{question.title}</span>
-                <span>{question.createdAt}</span>
+            questions.map((question, index) => (
+              <div className="customer-table-row" key={question.question_id}>
+                <span>{index + 1}</span>
+                <span>{question.content}</span>
+                <span>{formatDate(question.created_at)}</span>
                 <span>
-                  <span className="customer-status-badge">{question.status}</span>
+                  <span className="customer-status-badge">{question.answer_status}</span>
                 </span>
               </div>
             ))
@@ -135,13 +175,23 @@ function CustomerService() {
         </div>
       </div>
 
-      <button
-        className="customer-primary-button customer-refund-button"
-        type="button"
-        onClick={openRefundModal}
-      >
-        환불하기
-      </button>
+      <div className="customer-bottom-actions">
+        <button
+          className="customer-primary-button customer-refund-button"
+          type="button"
+          onClick={openRefundModal}
+        >
+          환불하기
+        </button>
+
+        <button
+          className="customer-secondary-button customer-withdraw-button"
+          type="button"
+          onClick={handleWithdrawClick}
+        >
+          탈퇴하기
+        </button>
+      </div>
 
       {isRefundModalOpen && (
         <div className="customer-modal-backdrop" role="presentation">
@@ -153,15 +203,18 @@ function CustomerService() {
               </button>
             </div>
 
+            <p className="customer-modal-description">환불 사유를 선택해주세요.</p>
+
             <div className="customer-refund-options">
               {refundReasons.map((refundReason) => (
                 <label className="customer-refund-option" key={refundReason}>
                   <input
-                    type="checkbox"
+                    type="radio"
+                    name="refundReason"
                     checked={selectedRefundReason === refundReason}
                     onChange={() => setSelectedRefundReason(refundReason)}
                   />
-                  <span className="customer-checkbox" aria-hidden="true" />
+                  <span className="customer-radio" aria-hidden="true" />
                   <span>{refundReason}</span>
                 </label>
               ))}

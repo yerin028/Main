@@ -3,36 +3,40 @@ from datetime import datetime
 from pydantic import BaseModel, Field
 
 
-class PaymentCreateSchema(BaseModel):
-    amount: int = Field(..., ge=0, description="Payment amount.")
-    payment_status: str = Field(default="READY", max_length=50, description="Payment status.")
-    payment_method: str | None = Field(default=None, max_length=100, description="Payment method.")
-    toss_order_id: str | None = Field(default=None, max_length=255, description="Toss order id.")
-    user_id: int | None = Field(default=None, description="User id.")
-
-
-class PaymentStatusUpdateSchema(BaseModel):
-    payment_status: str = Field(..., max_length=50, description="Changed payment status.")
-    payment_method: str | None = Field(default=None, max_length=100, description="Payment method.")
-    paid_at: datetime | None = Field(default=None, description="Paid datetime.")
-
-
-class PaymentConfirmSchema(BaseModel):
-    payment_key: str = Field(..., max_length=200, description="Toss payment key.")
-    order_id: str = Field(..., max_length=64, description="Toss order id.")
-    amount: int = Field(..., ge=0, description="Payment amount.")
-    user_id: int | None = Field(default=None, description="User id.")
-
-
-class PaymentSchema(BaseModel):
-    payment_id: int
+class PaymentBase(BaseModel):
     amount: int
     payment_status: str
     payment_method: str | None = None
     toss_order_id: str | None = None
-    payment_key: str | None = None
     paid_at: datetime | None = None
-    user_id: int | None = None
-    created_at: datetime | None = None
+    toss_payment_key: str | None = None
+    user_id: int
 
-    model_config = {"from_attributes": True}
+
+class PaymentCreate(PaymentBase):
+    pass
+
+
+class PaymentStatusUpdate(BaseModel):
+    payment_status: str = Field(..., max_length=50)
+    payment_method: str | None = Field(default=None, max_length=50)
+    paid_at: datetime | None = None
+
+
+class PaymentConfirm(BaseModel):
+    payment_key: str = Field(..., max_length=200)
+    order_id: str = Field(..., max_length=100)
+    amount: int = Field(..., ge=0)
+    user_id: int
+
+
+class PaymentSchema(PaymentBase):
+    payment_id: int
+
+    class Config:
+        from_attributes = True
+
+
+PaymentCreateSchema = PaymentCreate
+PaymentStatusUpdateSchema = PaymentStatusUpdate
+PaymentConfirmSchema = PaymentConfirm

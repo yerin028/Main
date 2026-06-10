@@ -1,4 +1,3 @@
-
 /*시작화면*/
 
 .start-wrapper {
@@ -7,30 +6,59 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #f5f7fa;
+    background: linear-gradient(135deg, #dce8f5 0%, #f0eaf8 50%, #fce8ef 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.start-wrapper::before {
+    content: '';
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    border: 40px solid rgba(255, 255, 255, 0.4);
+    bottom: -80px;
+    right: 80px;
+}
+
+.start-wrapper::after {
+    content: '';
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    border: 30px solid rgba(255, 255, 255, 0.3);
+    top: 60px;
+    right: 200px;
 }
 
 .start-card {
-    background-color: #eef1f8;
+    background-color: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(10px);
     border-radius: 16px;
-    padding: 120px 140px;
+    padding: 100px 140px;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 16px;
-    width: 900px;
+    width: 600px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+    z-index: 1;
 }
 
 .start-logo {
     font-size: 70px;
     color: #1a2e55;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
+    font-weight: 700;
 }
 
 .start-subtitle {
-    font-size: 20px;
-    color: #1a2e55;
+    font-size: 16px;
+    color: #555;
     margin-bottom: 20px;
+    white-space: nowrap;
 }
 
 .start-buttons {

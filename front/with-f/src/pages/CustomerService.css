@@ -1,38 +1,39 @@
+/*고객센터*/
 .customer-service-page {
-  width: min(1480px, 100%);
+  width: min(969px, 100%);
   margin: 0 auto;
   color: #071631;
 }
 
 .customer-section-title {
-  margin: 0 0 16px;
+  margin: 0 0 12px;
   color: #071631;
-  font-size: 28px;
+  font-size: 19px;
   font-weight: 800;
   line-height: 1.2;
 }
 
 .customer-question-section {
-  margin-bottom: 42px;
+  margin-bottom: 28px;
 }
 
 .customer-question-form {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 220px;
-  gap: 36px;
+  grid-template-columns: minmax(0, 1fr) 160px;
+  gap: 26px;
   align-items: center;
 }
 
 .customer-question-input {
   width: 100%;
-  height: 118px;
+  height: 77px;
   resize: none;
   border: 1.5px solid #b8cce8;
-  border-radius: 10px;
-  padding: 28px 30px;
+  border-radius: 9px;
+  padding: 19px 20px;
   color: #071631;
   font: inherit;
-  font-size: 23px;
+  font-size: 15px;
   font-weight: 500;
   outline: none;
 }
@@ -48,10 +49,10 @@
 
 .customer-primary-button,
 .customer-secondary-button {
-  border-radius: 9px;
+  border-radius: 8px;
   cursor: pointer;
   font: inherit;
-  font-size: 25px;
+  font-size: 17px;
   font-weight: 800;
 }
 
@@ -73,28 +74,28 @@
 }
 
 .customer-submit-button {
-  height: 90px;
+  height: 59px;
 }
 
 .customer-list-section {
-  margin-bottom: 34px;
+  margin-bottom: 23px;
 }
 
 .customer-question-table {
   overflow: hidden;
   border: 1.5px solid #b8cce8;
-  border-radius: 12px;
+  border-radius: 11px;
   background: #ffffff;
 }
 
 .customer-table-row {
   display: grid;
-  grid-template-columns: 160px minmax(280px, 1fr) 250px 210px;
+  grid-template-columns: 117px minmax(204px, 1fr) 183px 153px;
   align-items: center;
-  min-height: 72px;
+  min-height: 48px;
   border-bottom: 1px solid #d5e0f1;
   color: #071631;
-  font-size: 22px;
+  font-size: 15px;
   font-weight: 500;
 }
 
@@ -103,45 +104,70 @@
 }
 
 .customer-empty-row {
-  min-height: 84px;
+  min-height: 55px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #71809a;
-  font-size: 21px;
+  font-size: 14px;
   font-weight: 600;
 }
 
 .customer-table-row span {
-  padding: 0 28px;
+  padding: 0 19px;
+}
+
+.customer-table-row span:nth-child(1) {
+  text-align: center;
+}
+
+.customer-table-row span:nth-child(3) {
+  text-align: center;
+}
+
+.customer-table-row span:nth-child(4) {
+  text-align: center;
 }
 
 .customer-table-header {
-  min-height: 62px;
-  font-size: 20px;
+  min-height: 41px;
+  font-size: 14px;
   font-weight: 800;
 }
 
 .customer-status-badge {
   display: inline-flex;
-  min-width: 132px;
-  min-height: 42px;
+  min-width: 86px;
+  min-height: 28px;
   align-items: center;
   justify-content: center;
   border: 1px solid #d3dfef;
-  border-radius: 8px;
+  border-radius: 7px;
   background: #f3f6fb;
   color: #062a61;
-  font-size: 20px;
+  font-size: 14px;
   font-weight: 800;
 }
 
+.customer-bottom-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(131px, 190px));
+  justify-content: center;
+  gap: 21px;
+  width: 100%;
+}
+
+.customer-refund-button,
+.customer-withdraw-button {
+  height: 51px;
+}
+
 .customer-refund-button {
-  display: block;
-  width: min(520px, 100%);
-  height: 78px;
-  margin: 0 auto;
-  font-size: 30px;
+  font-size: 16px;
+}
+
+.customer-withdraw-button {
+  font-size: 16px;
 }
 
 .customer-modal-backdrop {
@@ -151,59 +177,82 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px;
-  background: rgba(7, 22, 49, 0.55);
+  padding: 18px;
+  background: rgba(7, 22, 49, 0.58);
+  backdrop-filter: blur(2px);
 }
 
 .customer-refund-modal {
-  width: min(620px, 100%);
-  border: 1.5px solid #c8d7ee;
-  border-radius: 18px;
+  width: min(467px, 100%);
+  border: 1px solid #dce4f0;
+  border-radius: 13px;
   background: #ffffff;
-  padding: 46px 50px 50px;
+  padding: 40px 37px 37px;
   color: #071631;
-  box-shadow: 0 28px 70px rgba(7, 22, 49, 0.28);
+  box-shadow: 0 28px 70px rgba(7, 22, 49, 0.32);
 }
 
 .customer-modal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 34px;
+  margin-bottom: 22px;
 }
 
 .customer-modal-header h2 {
   margin: 0;
-  font-size: 34px;
+  font-size: 28px;
   font-weight: 900;
+  letter-spacing: 0;
+}
+
+.customer-modal-description {
+  margin: 0 0 24px;
+  color: #52617a;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.35;
 }
 
 .customer-modal-close {
-  width: 44px;
-  height: 44px;
+  width: 32px;
+  height: 32px;
   border: 0;
   background: transparent;
-  color: #062a61;
+  color: #25334a;
   cursor: pointer;
-  font-size: 54px;
-  font-weight: 300;
-  line-height: 0.8;
+  font-size: 38px;
+  font-weight: 200;
+  line-height: 1;
 }
 
 .customer-refund-options {
   display: grid;
-  gap: 28px;
-  margin-bottom: 66px;
+  gap: 14px;
+  margin-bottom: 37px;
 }
 
 .customer-refund-option {
   display: flex;
   align-items: center;
-  gap: 24px;
+  min-height: 74px;
+  gap: 20px;
+  border: 1.5px solid #dfe6f0;
+  border-radius: 8px;
+  padding: 0 26px;
+  background: #ffffff;
   color: #071631;
   cursor: pointer;
-  font-size: 27px;
-  font-weight: 800;
+  font-size: 16px;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(7, 22, 49, 0.04);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.customer-refund-option:hover,
+.customer-refund-option:has(input:checked) {
+  border-color: #8da8d0;
+  box-shadow: 0 4px 14px rgba(7, 22, 49, 0.08);
 }
 
 .customer-refund-option input {
@@ -213,39 +262,37 @@
   opacity: 0;
 }
 
-.customer-checkbox {
-  width: 34px;
-  height: 34px;
-  border: 3px solid #062a61;
-  border-radius: 7px;
+.customer-radio {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #365d99;
+  border-radius: 50%;
   background: #ffffff;
   position: relative;
+  flex-shrink: 0;
 }
 
-.customer-refund-option input:checked + .customer-checkbox::after {
+.customer-refund-option input:checked + .customer-radio::after {
   content: "";
   position: absolute;
-  left: 7px;
-  top: 3px;
-  width: 15px;
-  height: 22px;
-  border-right: 4px solid #062a61;
-  border-bottom: 4px solid #062a61;
-  transform: rotate(45deg);
+  inset: 4px;
+  border-radius: 50%;
+  background: #062a61;
 }
 
 .customer-modal-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 42px;
+  gap: 22px;
 }
 
 .customer-modal-actions button {
-  height: 76px;
+  height: 52px;
+  font-size: 17px;
 }
 
 .customer-modal-submit {
-  font-size: 25px;
+  font-size: 17px;
 }
 
 @media (max-width: 900px) {
@@ -285,5 +332,9 @@
   .customer-modal-actions {
     grid-template-columns: 1fr;
     gap: 14px;
+  }
+
+  .customer-bottom-actions {
+    grid-template-columns: 1fr;
   }
 }

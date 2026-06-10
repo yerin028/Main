@@ -13,15 +13,41 @@ if not MONGODB_URI:
     raise ValueError("MONGODB_URI를 .env 파일에서 찾을 수 없습니다!")
 
 # 2. 클라우드 MongoDB 접속 엔진 설정
-client = MongoClient(MONGODB_URI)
+client = MongoClient(
+    MONGODB_URI,
+    serverSelectionTimeoutMS=3000,
+    connectTimeoutMS=3000,
+    socketTimeoutMS=3000,
+)
 db = client.get_default_database()
 
 
 # ==========================================
 # [MongoDB 공용 컬렉션 창구] - 주석 해제 (init용)
 # ==========================================
-def get_mongo_collection():
-    return db["recognition_logs"]
+def get_mongo_collection(collection_name: str = "recognition_logs"):
+    return db[collection_name]
+
+
+def get_dictionary_collection():
+    # 수어표현검색 데이터가 저장되는 MongoDB 컬렉션입니다.
+    return db["Dictionary"]
+
+
+
+def get_lesson_categories_collection():
+    # 수어학습 카테고리 데이터가 저장되는 MongoDB 컬렉션입니다.
+    return db["lesson_categories"]
+
+
+def get_lessons_collection():
+    # 수어학습 단어/강의 데이터가 저장되는 MongoDB 컬렉션입니다.
+    return db["lessons"]
+
+def get_interpreter_collection():
+    # 수어통역 실행 기록이 저장되는 MongoDB 컬렉션입니다.
+    return db["interpreter_log"]
+
 
 
 # ==========================================

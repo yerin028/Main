@@ -14,6 +14,7 @@ const paymentPlans = [
     periodMonth: 1,
     isDefault: false,
     isSelectable: false,
+    features: ["수어 학습", "수어 통역 서비스"],
   },
   {
     id: "standard",
@@ -23,15 +24,17 @@ const paymentPlans = [
     periodMonth: 1,
     isDefault: true,
     isSelectable: true,
+    features: ["수어 학습", "수어 퀴즈", "수어 통역 서비스"],
   },
   {
     id: "special-three-month",
-    title: "특별할인\n3개월",
+    title: "스탠다드\n3개월 구독 시",
     price: "9,900",
     amount: 9900,
     periodMonth: 3,
     isDefault: false,
     isSelectable: true,
+    features: ["수어 학습", "수어 퀴즈", "수어 통역 서비스"],
   },
 ];
 
@@ -223,7 +226,11 @@ function Payment() {
               disabled={isDisabled}
               onClick={() => handlePlanClick(paymentPlan)}
             >
-              <span className="payment-plan-title">
+              <span
+                className={`payment-plan-title ${
+                  paymentPlan.id !== "special-three-month" ? "payment-plan-title-lowered" : ""
+                }`}
+              >
                 {paymentPlan.title.split("\n").map((titleLine) => (
                   <span key={titleLine}>{titleLine}</span>
                 ))}
@@ -237,7 +244,7 @@ function Payment() {
               <span className="payment-divider" />
 
               <span className="payment-feature-list">
-                {paymentFeatures.map((paymentFeature) => (
+                {(paymentPlan.features || paymentFeatures).map((paymentFeature) => (
                   <span className="payment-feature-item" key={paymentFeature}>
                     <span className="payment-check-mark" aria-hidden="true" />
                     <span>{paymentFeature}</span>

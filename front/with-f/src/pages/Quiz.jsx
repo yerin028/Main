@@ -1,4 +1,3 @@
-// 수어퀴즈
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import './Quiz.css';
@@ -6,7 +5,7 @@ import './Quiz.css';
 const API_BASE_URL = 'http://127.0.0.1:8000/api/v1';
 
 const fallbackCategories = [
-  { category_id: 1, name: '인사', icon: 'person', description: '', sort_order: 1 },
+  { category_id: 1, name: '인사', icon: 'fi fi-br-hand-paper', description: '', sort_order: 1 },
   { category_id: 2, name: '일상생활', icon: 'hands', description: '', sort_order: 2 },
   { category_id: 3, name: '가족', icon: 'family', description: '', sort_order: 3 },
   { category_id: 4, name: '학교/직장', icon: 'school', description: '', sort_order: 4 },
@@ -55,7 +54,13 @@ function Quiz() {
         const response = await fetch(`${API_BASE_URL}/quiz/categories`);
         if (response.ok) {
           const data = await response.json();
-          setCategories(data.length > 0 ? data : fallbackCategories);
+          const categoriesWithIcons = data.map((category) => ({
+            ...category,
+            icon:
+              fallbackCategories.find((item) => item.category_id === category.category_id)
+                ?.icon ?? category.icon ?? 'hands',
+          }));
+          setCategories(data.length > 0 ? categoriesWithIcons : fallbackCategories);
         }
       } catch (err) {
         console.error("Failed to fetch categories", err);
@@ -296,3 +301,4 @@ function Quiz() {
 }
 
 export default Quiz;
+

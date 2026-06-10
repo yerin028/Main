@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware  # 프론트엔드 localhost 
 
 from app.api.v1.endpoints.dictionary import router as dictionary_router  # 수어표현검색 API 라우터를 main에 직접 등록하기 위해 가져옵니다.
 from app.api.api import api_router
+from app.models import withdrawal
 
 # FastAPI 앱을 생성합니다.
 # title 값은 Swagger 문서(/docs) 상단에 표시되는 API 이름입니다.
@@ -25,6 +26,7 @@ app.add_middleware(
 # dictionary_router 안의 최종 API 주소는 /api/v1/dictionary 로 시작합니다.
 app.include_router(dictionary_router)
 app.include_router(api_router, prefix="/api/v1")
+
 
 @app.get("/")
 def read_root():

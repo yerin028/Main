@@ -1,23 +1,23 @@
 .payment-page {
-  width: min(1420px, calc(100% - 96px));
-  margin: 64px auto 0;
-  padding-bottom: 56px;
+  width: min(828px, calc(100% - 55px));
+  margin: 37px auto 0;
+  padding-bottom: 33px;
 }
 
 .payment-card-list {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 46px;
+  gap: 27px;
 }
 
 .payment-card {
   display: flex;
-  min-height: 596px;
+  min-height: 347px;
   flex-direction: column;
   align-items: center;
-  padding: 68px 48px 54px;
+  padding: 40px 28px 32px;
   border: 2px solid #b8cce8;
-  border-radius: 14px;
+  border-radius: 13px;
   background: #ffffff;
   color: #071631;
   cursor: pointer;
@@ -31,8 +31,8 @@
 }
 
 .payment-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 14px 32px rgba(6, 42, 97, 0.12);
+  transform: translateY(-2px);
+  box-shadow: 0 11px 26px rgba(6, 42, 97, 0.12);
 }
 
 .payment-card-selected {
@@ -51,34 +51,38 @@
 
 .payment-plan-title {
   display: flex;
-  min-height: 88px;
+  min-height: 96px;
   flex-direction: column;
   justify-content: center;
   color: #062a61;
-  font-size: 48px;
+  font-size: 28px;
   font-weight: 800;
   line-height: 1.25;
   text-shadow: 0 3px 0 rgba(6, 42, 97, 0.12);
 }
 
+.payment-plan-title-lowered {
+  transform: translateY(12px);
+}
+
 .payment-price-box {
   display: flex;
-  min-height: 116px;
+  min-height: 102px;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 5px;
   color: #062a61;
 }
 
 .payment-price {
-  font-size: 64px;
+  font-size: 37px;
   font-weight: 800;
   line-height: 1;
 }
 
 .payment-price-unit {
-  padding-top: 8px;
-  font-size: 26px;
+  padding-top: 5px;
+  font-size: 15px;
   font-weight: 700;
   line-height: 1;
   white-space: nowrap;
@@ -87,46 +91,46 @@
 .payment-divider {
   width: 100%;
   height: 2px;
-  margin: 42px 0 40px;
+  margin: 25px 0 23px;
   background: #bfd2ef;
 }
 
 .payment-feature-list {
   display: grid;
-  gap: 30px;
+  gap: 18px;
   width: 100%;
 }
 
 .payment-feature-item {
   display: grid;
-  grid-template-columns: 40px 1fr;
+  grid-template-columns: 23px 1fr;
   align-items: center;
   color: #071631;
-  font-size: 29px;
+  font-size: 17px;
   font-weight: 500;
   text-align: left;
 }
 
 .payment-check-mark {
-  width: 28px;
-  height: 16px;
+  width: 16px;
+  height: 10px;
   margin-left: 2px;
-  border-bottom: 5px solid #062a61;
-  border-left: 5px solid #062a61;
+  border-bottom: 4px solid #062a61;
+  border-left: 4px solid #062a61;
   transform: rotate(-45deg) translateY(-2px);
   transform-origin: center;
 }
 
 .payment-submit-button {
   width: 100%;
-  min-height: 96px;
-  margin-top: 52px;
+  min-height: 56px;
+  margin-top: 31px;
   border: 0;
-  border-radius: 9px;
+  border-radius: 8px;
   background: #062a61;
   color: #ffffff;
   cursor: pointer;
-  font-size: 40px;
+  font-size: 23px;
   font-weight: 800;
   box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.1);
 }
@@ -142,39 +146,39 @@
 
 @media (max-width: 1200px) {
   .payment-page {
-    width: min(620px, calc(100% - 32px));
-    margin-top: 32px;
+    width: min(558px, calc(100% - 29px));
+    margin-top: 29px;
   }
 
   .payment-card-list {
     grid-template-columns: 1fr;
-    gap: 24px;
+    gap: 22px;
   }
 
   .payment-card {
     min-height: auto;
-    padding: 42px 30px;
+    padding: 38px 27px;
   }
 
   .payment-plan-title {
-    font-size: 38px;
+    font-size: 34px;
   }
 
   .payment-price {
-    font-size: 54px;
+    font-size: 49px;
   }
 
   .payment-price-unit {
-    font-size: 22px;
+    font-size: 20px;
   }
 
   .payment-feature-item {
-    font-size: 23px;
+    font-size: 21px;
   }
 
   .payment-submit-button {
-    min-height: 72px;
-    margin-top: 30px;
-    font-size: 30px;
+    min-height: 65px;
+    margin-top: 27px;
+    font-size: 27px;
   }
 }
