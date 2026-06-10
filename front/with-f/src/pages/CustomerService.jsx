@@ -99,9 +99,30 @@ function CustomerService() {
     }
   };
 
-  const handleWithdrawClick = () => {
-    alert("탈퇴 기능은 준비 중입니다.");
-  };
+  const handleWithdrawClick = async () => {
+  const confirmed = window.confirm("정말 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.");
+  if (!confirmed) return;
+
+  const userId = getCurrentUserId();
+  if (!userId) {
+    alert("로그인 정보가 없습니다.");
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/v1/cs/withdraw?user_id=${userId}`,
+      { method: "POST" }
+    );
+    if (!response.ok) throw new Error("탈퇴 처리에 실패했습니다.");
+
+    alert("탈퇴가 완료되었습니다.");
+    localStorage.clear();
+    window.location.href = "/";
+  } catch (error) {
+    alert(error.message);
+  }
+};
 
   return (
     <section className="customer-service-page" aria-label="고객센터">

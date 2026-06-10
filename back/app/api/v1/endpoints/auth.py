@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 from sqlalchemy.orm import Session
 from app.core.mysql_database import get_db
 from app.models.users import User
+from app.models.withdrawal import UserWithdrawal
 
 load_dotenv()
 
@@ -165,3 +166,34 @@ async def google_login(code: str, db: Session = Depends(get_db)):
 
     user = save_or_get_user(db, "google", google_id, nickname, email)
     return {"user_id": user.user_id, "google_id": google_id, "email": email, "nickname": nickname}
+
+# 탈퇴 여부 체크
+def save_or_get_user(db: Session, social_provider: str, social_id: str, name: str, email: str = None):
+    # 이미 가입한 유저인지 확인
+    existing_user = db.query(User).filter(
+        User.social_id == social_id,
+        User.social_provider == social_provider
+    ).first()
+
+    if existing_user:
+        # 탈퇴한 유저인지 체크
+        withdrawal = db.query(UserWithdrawal).filter(
+            UserWithdrawal.user_id == existing_user.user_id
+        ).first()
+        if withdrawal:
+            from fastapi import HTTPException
+            raise HTTPException(status_code=403, detail="탈퇴한 사용자입니다.")
+        return existing_user
+
+    # 최초 가입 시 새 유저 생성
+    new_user = User(
+        social_provider=social_provider,
+        social_id=social_id,
+        name=name,
+        email=email,
+        customer_key=str(uuid.uuid4())
+    )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return new_user

@@ -19,3 +19,4 @@ class User(Base):
     created_at            = Column(DateTime(timezone=True), server_default=func.now())
 
     payments = relationship("Payment", back_populates="user")
+    withdrawal = relationship("UserWithdrawal", back_populates="user", uselist=False)
