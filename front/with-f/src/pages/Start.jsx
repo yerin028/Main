@@ -1,6 +1,5 @@
 // 시작화면
 
-
 import { useNavigate } from 'react-router-dom';
 import './Start.css';
 
@@ -17,7 +16,7 @@ function Start() {
                 </div>
             </div>
         </div>
-    )
+    );
 }
 
 export default Start;
