@@ -130,9 +130,12 @@ def create_question(
     response_model=list[CSQuestionSchema],
     status_code=status.HTTP_200_OK,
 )
-def read_questions():
+def read_questions(user_id: int | None = None):
     try:
-        documents = get_question_collection().find({}).sort("question_id", 1)
+        query = {}
+        if user_id is not None:
+            query["user_id"] = user_id
+        documents = get_question_collection().find(query).sort("question_id", -1)
         return [serialize_question(document) for document in documents]
     except PyMongoError as error:
         raise HTTPException(

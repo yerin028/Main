@@ -15,6 +15,8 @@ function Home() {
     const location = useLocation();
     const [lastLessonProgress, setLastLessonProgress] = useState(null);
     const [todayStats, setTodayStats] = useState({ studied_count: 0, percent: 0 });
+    const [paymentInfo, setPaymentInfo] = useState(null);
+    const [userInfo, setUserInfo] = useState(null);
 
     const handleLogout = () => {
         navigate('/');
@@ -46,14 +48,66 @@ function Home() {
             }
         };
 
+        const loadPaymentInfo = async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}/payment?user_id=${userId}`);
+                if (!response.ok) return;
+                const data = await response.json();
+                if (!Array.isArray(data) || data.length === 0) {
+                    setPaymentInfo(null);
+                    return;
+                }
+
+                const latestPayment = [...data].sort(
+                    (a, b) =>
+                        new Date(b.paid_at || 0) -
+                        new Date(a.paid_at || 0)
+                )[0];
+                setPaymentInfo(latestPayment);
+            } catch {
+                setPaymentInfo(null);
+            }
+        };
+
+        const loadUserInfo = async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/me?user_id=${userId}`);
+                if (!response.ok) return;
+                const data = await response.json();
+                setUserInfo(data);
+            } catch {
+                setUserInfo(null);
+            }
+        };
+
         loadLastLessonProgress();
         loadTodayStats();
+        loadPaymentInfo();
+        loadUserInfo();
     }, [location]);
 
     const goToLastLesson = () => {
         if (!lastLessonProgress?.category_id) return;
         navigate(`/learn?category_id=${lastLessonProgress.category_id}`);
     };
+
+    const getPlanName = (amount) => {
+        if (amount === 4900) return "스탠다드";
+        if (amount === 9900) return "스탠다드 3개월";
+        return "이용권";
+    };
+
+    const remainingDays = userInfo?.subscription_end_date
+    ? Math.max(
+        0,
+        Math.ceil(
+            (new Date(userInfo.subscription_end_date) - new Date()) /
+            (1000 * 60 * 60 * 24)
+        )
+    )
+    : 0;
+
+const isSubscribed = remainingDays > 0;
 
     return (
         <div className="home-wrapper">
@@ -108,10 +162,21 @@ function Home() {
                     <div className="home-card-icon">💳</div>
                     <div className="home-card-content">
                         <h3>결제 정보</h3>
-                        <p>이용 중인 플랜과 잔여 기간을 확인하세요.</p>
+                        {isSubscribed && paymentInfo ? (
+                            <>
+                                <p>이용 중인 플랜 · {getPlanName(paymentInfo.amount)}</p>
+                                <p>결제일 · {new Date(paymentInfo.paid_at).toLocaleDateString("ko-KR")}</p>
+                                <p>잔여 기간 · {userInfo?.subscription_end_date
+                                    ? `${Math.max(0, Math.ceil((new Date(userInfo.subscription_end_date) - new Date()) / (1000 * 60 * 60 * 24)))}일`
+                                    : '0일'}
+                                </p>
+                            </>
+                        ) : (
+                            <p>이용 중인 플랜과 잔여 기간을 확인하세요.</p>
+                        )}
                     </div>
                 </div>
-            </div>
+            </div>  {/* home-cards 닫기 */}
 
             {/* 로그아웃 버튼 */}
             <button className="home-logout-btn" onClick={handleLogout}>
