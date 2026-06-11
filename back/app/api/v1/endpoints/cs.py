@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pymongo.errors import PyMongoError
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.core.mongo_database import get_mongo_collection
@@ -56,7 +57,11 @@ def get_optional_user_snapshot(db: Session | None, user_id: int | None):
     if db is None or user_id is None:
         return {}
 
-    user = db.query(User).filter(User.user_id == user_id).first()
+    try:
+        user = db.query(User).filter(User.user_id == user_id).first()
+    except SQLAlchemyError:
+        return {"user_id": user_id}
+
     if not user:
         return {"user_id": user_id}
 
@@ -68,8 +73,15 @@ def get_optional_user_snapshot(db: Session | None, user_id: int | None):
 
 
 def get_document_user_snapshot(document, db: Session | None = None):
+    user_id = document.get("user_id")
+
+    try:
+      user_id = int(user_id) if user_id is not None else None
+    except (TypeError, ValueError):
+      user_id = None
+
     user_snapshot = {
-        "user_id": document.get("user_id"),
+        "user_id": user_id,
         "user_name": document.get("user_name"),
         "user_email": document.get("user_email"),
     }
