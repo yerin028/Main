@@ -1,6 +1,8 @@
 // 관리자페이지
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import adminModeIcon from "../assets/admin-mode-icon.png";
+import refundManagementIcon from "../assets/refund-management-icon.png";
 import "./Admin.css";
 
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000";
@@ -181,7 +183,7 @@ function Admin() {
         <h1 className="admin-page-title">관리자 페이지</h1>
 
         <button className="admin-mode-button" type="button" onClick={() => setAdminView("questions")}>
-          <span className="admin-money-icon" aria-hidden="true">$</span>
+          <img className="admin-money-icon" src={refundManagementIcon} alt="" aria-hidden="true" />
           환불 관리
         </button>
 
@@ -237,7 +239,7 @@ function Admin() {
   return (
     <section className="admin-page">
       <button className="admin-mode-button" type="button" onClick={() => setAdminView("refunds")}>
-        <span className="admin-user-icon" aria-hidden="true" />
+        <img className="admin-user-icon" src={adminModeIcon} alt="" aria-hidden="true" />
         관리자 모드
       </button>
 
