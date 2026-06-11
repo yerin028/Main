@@ -60,6 +60,7 @@ class RefundSchema(BaseModel):
     payment_amount: int | None = None
     payment_status: str | None = None
     toss_order_id: str | None = None
+    toss_payment_key: str | None = None 
 
     class Config:
         from_attributes = True

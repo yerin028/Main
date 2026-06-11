@@ -124,6 +124,7 @@ function Payment() {
             payment_key: paymentKey,
             order_id: orderId,
             amount,
+            user_id: Number(localStorage.getItem("user_id")),
           }),
         });
 
@@ -183,6 +184,7 @@ function Payment() {
           payment_status: "READY",
           payment_method: "CARD",
           toss_order_id: orderId,
+          user_id: Number(localStorage.getItem("user_id")),
         }),
       });
 

@@ -1,66 +1,225 @@
-/*고객센터*/
 .customer-service-page {
-  width: min(969px, 100%);
+  width: min(1100px, 100%);
   margin: 0 auto;
+  padding: 0 40px 60px;
   color: #071631;
 }
-
-.customer-section-title {
-  margin: 0 0 12px;
-  color: #071631;
-  font-size: 19px;
-  font-weight: 800;
-  line-height: 1.2;
-}
-
-.customer-question-section {
+/* 헤더 */
+.customer-header {
   margin-bottom: 28px;
 }
 
-.customer-question-form {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 160px;
-  gap: 26px;
-  align-items: center;
+.customer-page-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #071631;
+  margin: 0 0 6px;
+}
+
+.customer-page-subtitle {
+  font-size: 14px;
+  color: #71809a;
+  margin: 0;
+}
+
+/* 문의하기 카드 */
+.customer-question-card {
+  border: 1.5px solid #dde6f3;
+  border-radius: 12px;
+  padding: 24px 28px;
+  background: #ffffff;
+  margin-bottom: 32px;
+}
+
+.customer-section-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: #071631;
+  margin: 0 0 4px;
+}
+
+.customer-section-desc {
+  font-size: 13px;
+  color: #71809a;
+  margin: 0 0 14px;
 }
 
 .customer-question-input {
   width: 100%;
-  height: 77px;
+  height: 110px;
   resize: none;
-  border: 1.5px solid #b8cce8;
-  border-radius: 9px;
-  padding: 19px 20px;
+  border: 1.5px solid #dde6f3;
+  border-radius: 8px;
+  padding: 14px 16px;
   color: #071631;
   font: inherit;
-  font-size: 15px;
-  font-weight: 500;
+  font-size: 14px;
   outline: none;
+  box-sizing: border-box;
 }
 
 .customer-question-input::placeholder {
-  color: #71809a;
+  color: #aab4c4;
 }
 
 .customer-question-input:focus {
   border-color: #062a61;
-  box-shadow: 0 0 0 3px rgba(6, 42, 97, 0.08);
 }
 
+.customer-question-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.customer-char-count {
+  font-size: 13px;
+  color: #71809a;
+}
+
+.customer-submit-button {
+  padding: 10px 22px;
+  background: #062a61;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.customer-submit-button:hover {
+  background: #041f49;
+}
+
+/* 내 문의 내역 */
+.customer-list-section {
+  margin-bottom: 32px;
+}
+
+.customer-list-section .customer-section-title {
+  margin-bottom: 12px;
+}
+
+.customer-question-table {
+  border: 1.5px solid #dde6f3;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.customer-empty-row {
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #71809a;
+  font-size: 14px;
+}
+
+.customer-table-row {
+  display: flex;
+  align-items: center;
+  padding: 14px 20px;
+  border-bottom: 1px solid #eef2f8;
+  gap: 16px;
+  cursor: pointer;
+}
+
+.customer-table-row:last-child {
+  border-bottom: none;
+}
+
+.customer-table-row:hover {
+  background: #f7f9fd;
+}
+
+.customer-row-num {
+  font-size: 14px;
+  color: #71809a;
+  min-width: 24px;
+  text-align: center;
+}
+
+.customer-row-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.customer-row-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #071631;
+}
+
+.customer-row-date {
+  font-size: 12px;
+  color: #71809a;
+}
+
+.customer-status-badge {
+  font-size: 13px;
+  font-weight: 600;
+  color: #e67e22;
+  white-space: nowrap;
+  min-width: 80px;
+  text-align: right;
+}
+
+.customer-status-badge.answered {
+  color: #1a56db;
+}
+
+.customer-row-arrow {
+  font-size: 18px;
+  color: #aab4c4;
+}
+
+/* 하단 버튼 */
+.customer-bottom-actions {
+  display: flex;
+  justify-content: center;
+  gap: 60px;
+}
+
+.customer-action-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  color: #52617a;
+  font-weight: 600;
+}
+
+.customer-action-button:hover {
+  color: #062a61;
+}
+
+.customer-action-icon {
+  font-size: 22px;
+}
+
+/* 모달 */
 .customer-primary-button,
 .customer-secondary-button {
   border-radius: 8px;
   cursor: pointer;
   font: inherit;
-  font-size: 17px;
-  font-weight: 800;
+  font-size: 15px;
+  font-weight: 700;
 }
 
 .customer-primary-button {
   border: 0;
   background: #062a61;
   color: #ffffff;
-  box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.08);
 }
 
 .customer-primary-button:hover {
@@ -71,103 +230,6 @@
   border: 2px solid #062a61;
   background: #ffffff;
   color: #062a61;
-}
-
-.customer-submit-button {
-  height: 59px;
-}
-
-.customer-list-section {
-  margin-bottom: 23px;
-}
-
-.customer-question-table {
-  overflow: hidden;
-  border: 1.5px solid #b8cce8;
-  border-radius: 11px;
-  background: #ffffff;
-}
-
-.customer-table-row {
-  display: grid;
-  grid-template-columns: 117px minmax(204px, 1fr) 183px 153px;
-  align-items: center;
-  min-height: 48px;
-  border-bottom: 1px solid #d5e0f1;
-  color: #071631;
-  font-size: 15px;
-  font-weight: 500;
-}
-
-.customer-table-row:last-child {
-  border-bottom: 0;
-}
-
-.customer-empty-row {
-  min-height: 55px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #71809a;
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.customer-table-row span {
-  padding: 0 19px;
-}
-
-.customer-table-row span:nth-child(1) {
-  text-align: center;
-}
-
-.customer-table-row span:nth-child(3) {
-  text-align: center;
-}
-
-.customer-table-row span:nth-child(4) {
-  text-align: center;
-}
-
-.customer-table-header {
-  min-height: 41px;
-  font-size: 14px;
-  font-weight: 800;
-}
-
-.customer-status-badge {
-  display: inline-flex;
-  min-width: 86px;
-  min-height: 28px;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid #d3dfef;
-  border-radius: 7px;
-  background: #f3f6fb;
-  color: #062a61;
-  font-size: 14px;
-  font-weight: 800;
-}
-
-.customer-bottom-actions {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(131px, 190px));
-  justify-content: center;
-  gap: 21px;
-  width: 100%;
-}
-
-.customer-refund-button,
-.customer-withdraw-button {
-  height: 51px;
-}
-
-.customer-refund-button {
-  font-size: 16px;
-}
-
-.customer-withdraw-button {
-  font-size: 16px;
 }
 
 .customer-modal-backdrop {
@@ -201,17 +263,15 @@
 
 .customer-modal-header h2 {
   margin: 0;
-  font-size: 28px;
+  font-size: 22px;
   font-weight: 900;
-  letter-spacing: 0;
 }
 
 .customer-modal-description {
   margin: 0 0 24px;
   color: #52617a;
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 1.35;
+  font-size: 15px;
+  font-weight: 600;
 }
 
 .customer-modal-close {
@@ -221,38 +281,33 @@
   background: transparent;
   color: #25334a;
   cursor: pointer;
-  font-size: 38px;
-  font-weight: 200;
+  font-size: 28px;
   line-height: 1;
 }
 
 .customer-refund-options {
   display: grid;
-  gap: 14px;
-  margin-bottom: 37px;
+  gap: 12px;
+  margin-bottom: 32px;
 }
 
 .customer-refund-option {
   display: flex;
   align-items: center;
-  min-height: 74px;
-  gap: 20px;
+  min-height: 64px;
+  gap: 16px;
   border: 1.5px solid #dfe6f0;
   border-radius: 8px;
-  padding: 0 26px;
-  background: #ffffff;
-  color: #071631;
+  padding: 0 22px;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 500;
-  box-shadow: 0 2px 8px rgba(7, 22, 49, 0.04);
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition: border-color 0.15s ease;
 }
 
 .customer-refund-option:hover,
 .customer-refund-option:has(input:checked) {
-  border-color: #8da8d0;
-  box-shadow: 0 4px 14px rgba(7, 22, 49, 0.08);
+  border-color: #062a61;
 }
 
 .customer-refund-option input {
@@ -263,8 +318,8 @@
 }
 
 .customer-radio {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   border: 2px solid #365d99;
   border-radius: 50%;
   background: #ffffff;
@@ -275,66 +330,102 @@
 .customer-refund-option input:checked + .customer-radio::after {
   content: "";
   position: absolute;
-  inset: 4px;
+  inset: 3px;
   border-radius: 50%;
   background: #062a61;
 }
 
 .customer-modal-actions {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 22px;
+  grid-template-columns: 1fr 2fr;
+  gap: 12px;
 }
 
 .customer-modal-actions button {
-  height: 52px;
-  font-size: 17px;
+  height: 48px;
 }
 
-.customer-modal-submit {
-  font-size: 17px;
+/* 페이지네이션 */
+.customer-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  margin-top: 20px;
 }
 
-@media (max-width: 900px) {
-  .customer-question-form {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-
-  .customer-submit-button {
-    width: 100%;
-  }
-
-  .customer-question-table {
-    overflow-x: auto;
-  }
-
-  .customer-table-row {
-    min-width: 820px;
-  }
+.customer-pagination button {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #dde6f3;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #071631;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
 }
 
-@media (max-width: 560px) {
-  .customer-section-title {
-    font-size: 24px;
-  }
+.customer-pagination button:hover:not(:disabled) {
+  background: #f0f4fb;
+}
 
-  .customer-question-input {
-    height: 110px;
-    padding: 22px;
-    font-size: 19px;
-  }
+.customer-pagination button.active {
+  background: #062a61;
+  color: #ffffff;
+  border-color: #062a61;
+}
 
-  .customer-refund-modal {
-    padding: 34px 28px;
-  }
+.customer-pagination button:disabled {
+  color: #aab4c4;
+  cursor: default;
+}
 
-  .customer-modal-actions {
-    grid-template-columns: 1fr;
-    gap: 14px;
-  }
+/* 질문 상세 모달 */
+.customer-detail-modal {
+  width: min(520px, 100%);
+  border-radius: 13px;
+  background: #ffffff;
+  padding: 36px;
+  box-shadow: 0 28px 70px rgba(7, 22, 49, 0.25);
+}
 
-  .customer-bottom-actions {
-    grid-template-columns: 1fr;
-  }
+.customer-detail-section {
+  margin-bottom: 16px;
+}
+
+.customer-detail-label {
+  font-size: 13px;
+  font-weight: 800;
+  color: #062a61;
+  margin-bottom: 8px;
+}
+
+.customer-detail-content {
+  font-size: 15px;
+  color: #071631;
+  line-height: 1.6;
+  background: #f7f9fd;
+  border-radius: 8px;
+  padding: 14px 16px;
+}
+
+.customer-detail-date {
+  font-size: 12px;
+  color: #71809a;
+  margin-top: 6px;
+}
+
+.customer-detail-empty {
+  font-size: 14px;
+  color: #aab4c4;
+  padding: 14px 16px;
+  background: #f7f9fd;
+  border-radius: 8px;
+}
+
+.customer-detail-divider {
+  height: 1px;
+  background: #eef2f8;
+  margin: 20px 0;
 }

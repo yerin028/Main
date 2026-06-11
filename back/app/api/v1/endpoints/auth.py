@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 import httpx
 import os
 import uuid
@@ -197,3 +197,15 @@ def save_or_get_user(db: Session, social_provider: str, social_id: str, name: st
     db.commit()
     db.refresh(new_user)
     return new_user
+
+@router.get("/me")
+def get_user(user_id: int, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.user_id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found.")
+    return {
+        "user_id": user.user_id,
+        "name": user.name,
+        "email": user.email,
+        "subscription_end_date": str(user.subscription_end_date) if user.subscription_end_date else None,
+    }

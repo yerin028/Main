@@ -1,83 +1,31 @@
 from datetime import datetime, timezone
-
 from fastapi import APIRouter, Depends, HTTPException, status
-from pymongo.errors import PyMongoError
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
-from app.core.mongo_database import get_mongo_collection
 from app.core.mysql_database import get_db
-from app.models.cs import REFUND_COLLECTION
-from app.models.payment import Payment
+from app.models.payment import Payment, Refund
 from app.models.users import User
 from app.schemas.cs import RefundCreate, RefundSchema
 
 router = APIRouter()
 
 
-def get_refund_collection():
-    return get_mongo_collection(REFUND_COLLECTION)
-
-
-def next_sequence(collection, sequence_field: str):
-    latest_document = collection.find_one(sort=[(sequence_field, -1)])
-    if not latest_document:
-        return 1
-
-    return int(latest_document.get(sequence_field, 0)) + 1
-
-
-def get_user_snapshot(db: Session, user_id: int | None):
-    if user_id is None:
-        return {}
-
-    user = db.query(User).filter(User.user_id == user_id).first()
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found.",
-        )
-
-    return {
-        "user_id": user.user_id,
-        "user_name": user.name,
-        "user_email": user.email,
-    }
-
-
-def get_payment_snapshot(db: Session, payment_id: int | None):
-    if payment_id is None:
-        return {}
-
-    payment = db.query(Payment).filter(Payment.payment_id == payment_id).first()
-    if not payment:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Payment not found.",
-        )
-
-    return {
-        "payment_id": payment.payment_id,
-        "payment_amount": payment.amount,
-        "payment_status": payment.payment_status,
-        "toss_order_id": payment.toss_order_id,
-        "payment_user_id": payment.user_id,
-    }
-
-
-def serialize_refund(document):
+def serialize_refund(refund: Refund, payment: Payment = None, user: User = None):
     return RefundSchema(
-        refund_id=document["refund_id"],
-        reason=document.get("reason"),
-        status=document.get("status"),
-        request_at=document.get("request_at"),
-        processed_at=document.get("processed_at"),
-        payment_id=document.get("payment_id"),
-        user_id=document.get("user_id"),
-        user_name=document.get("user_name"),
-        user_email=document.get("user_email"),
-        payment_amount=document.get("payment_amount"),
-        payment_status=document.get("payment_status"),
-        toss_order_id=document.get("toss_order_id"),
+        refund_id=refund.refund_id,
+        reason=refund.reason,
+        status=refund.status,
+        request_at=refund.request_at,
+        processed_at=refund.processed_at,
+        payment_id=refund.payment_id,
+        user_id=user.user_id if user else None,
+        user_name=user.name if user else None,
+        user_email=user.email if user else None,
+        payment_amount=payment.amount if payment else None,
+        payment_status=payment.payment_status if payment else None,
+        toss_order_id=payment.toss_order_id if payment else None,
+        toss_payment_key=payment.toss_payment_key if payment else None,
     )
 
 
@@ -90,30 +38,97 @@ def create_refund(
     refund_create: RefundCreate,
     db: Session = Depends(get_db),
 ):
-    collection = get_refund_collection()
-    payment_snapshot = get_payment_snapshot(db, refund_create.payment_id)
-    user_id = refund_create.user_id or payment_snapshot.get("payment_user_id")
-    user_snapshot = get_user_snapshot(db, user_id)
+    payment = None
+    user = None
+
+    if refund_create.payment_id:
+        payment = db.query(Payment).filter(Payment.payment_id == refund_create.payment_id).first()
+        if not payment:
+            raise HTTPException(status_code=404, detail="Payment not found.")
+
+    user_id = refund_create.user_id or (payment.user_id if payment else None)
+    if user_id:
+        user = db.query(User).filter(User.user_id == user_id).first()
+
+    refund = Refund(
+        reason=refund_create.reason,
+        status="신청",
+        request_at=datetime.now(timezone.utc),
+        payment_id=refund_create.payment_id,
+    )
 
     try:
-        document = {
-            "refund_id": next_sequence(collection, "refund_id"),
-            "reason": refund_create.reason,
-            "status": "신청",
-            "request_at": datetime.now(timezone.utc),
-            "processed_at": None,
-            **payment_snapshot,
-            **user_snapshot,
-        }
-        document.pop("payment_user_id", None)
-        collection.insert_one(document)
-    except PyMongoError as error:
+        db.add(refund)
+        db.commit()
+        db.refresh(refund)
+    except SQLAlchemyError as error:
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Failed to create refund.") from error
+
+    return serialize_refund(refund, payment, user)
+
+
+@router.patch(
+    "/{refund_id}/approve",
+    response_model=RefundSchema,
+)
+def approve_refund(
+    refund_id: int,
+    db: Session = Depends(get_db),
+):
+    refund = (
+        db.query(Refund)
+        .filter(Refund.refund_id == refund_id)
+        .first()
+    )
+
+    if not refund:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to create refund: {error}",
+            status_code=404,
+            detail="Refund not found."
+        )
+
+    payment = (
+        db.query(Payment)
+        .filter(Payment.payment_id == refund.payment_id)
+        .first()
+    )
+
+    if not payment:
+        raise HTTPException(
+            status_code=404,
+            detail="Payment not found."
+        )
+
+    user = (
+        db.query(User)
+        .filter(User.user_id == payment.user_id)
+        .first()
+    )
+
+    try:
+        payment.payment_status = "REFUNDED"
+
+        refund.status = "승인"
+        refund.processed_at = datetime.now(timezone.utc)
+
+        if user:
+            user.subscription_end_date = None
+            user.billing_key = None
+
+        db.commit()
+
+        db.refresh(refund)
+        db.refresh(payment)
+
+    except SQLAlchemyError as error:
+        db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to approve refund."
         ) from error
 
-    return serialize_refund(document)
+    return serialize_refund(refund, payment, user)
 
 
 @router.get(
@@ -121,12 +136,11 @@ def create_refund(
     response_model=list[RefundSchema],
     status_code=status.HTTP_200_OK,
 )
-def read_refunds():
-    try:
-        documents = get_refund_collection().find({}).sort("refund_id", 1)
-        return [serialize_refund(document) for document in documents]
-    except PyMongoError as error:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to read refunds: {error}",
-        ) from error
+def read_refunds(db: Session = Depends(get_db)):
+    refunds = db.query(Refund).order_by(Refund.refund_id).all()
+    result = []
+    for refund in refunds:
+        payment = db.query(Payment).filter(Payment.payment_id == refund.payment_id).first() if refund.payment_id else None
+        user = db.query(User).filter(User.user_id == payment.user_id).first() if payment else None
+        result.append(serialize_refund(refund, payment, user))
+    return result
