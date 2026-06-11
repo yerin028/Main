@@ -10,12 +10,15 @@ from sqlalchemy.orm import Session
 
 from app.core.mysql_database import engine, get_db
 from app.models.payment import Payment
+from app.models.users import User
 from app.schemas.payment import (
     PaymentConfirmSchema,
     PaymentCreateSchema,
     PaymentSchema,
     PaymentStatusUpdateSchema,
 )
+
+from datetime import timedelta
 
 load_dotenv()
 
@@ -130,6 +133,14 @@ async def confirm_payment(
     payment.payment_method = toss_data.get("method")
     payment.toss_payment_key = toss_data.get("paymentKey", payment_confirm.payment_key)
     payment.paid_at = parse_toss_datetime(toss_data.get("approvedAt"))
+
+    user = db.query(User).filter(User.user_id == payment.user_id).first()
+    if user:
+        days = 90 if payment.amount == 9900 else 30
+        base_date = datetime.now(timezone.utc).date()
+        if user.subscription_end_date and user.subscription_end_date > base_date:
+            base_date = user.subscription_end_date
+        user.subscription_end_date = base_date + timedelta(days=days)
 
     try:
         db.commit()
