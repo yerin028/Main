@@ -18,7 +18,12 @@ function KakaoCallback() {
         })
         .then(data => {
             console.log('로그인 성공:', data);
-            localStorage.setItem('user_id', data.user_id);
+            if (data.user_id) {
+              localStorage.setItem("user_id", String(data.user_id));
+            }
+            if (data.nickname) {
+              localStorage.setItem("user_name", data.nickname);
+            }
             navigate('/home');
         })
         .catch(err => {
