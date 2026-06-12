@@ -24,6 +24,8 @@ load_dotenv()
 
 router = APIRouter()
 TOSS_CONFIRM_URL = "https://api.tosspayments.com/v1/payments/confirm"
+# 토스 취소 URL
+TOSS_CANCEL_URL = "https://api.tosspayments.com/v1/payments/{}/cancel"
 
 
 def ensure_payment_table():
@@ -252,3 +254,45 @@ def update_payment_status(
         ) from error
 
     return payment
+
+
+# 추가 - 결제 취소 엔드포인트
+@router.post("/cancel", status_code=status.HTTP_200_OK)
+async def cancel_payment(
+    payment_id: int,
+    cancel_reason: str = "플랜 변경",
+    db: Session = Depends(get_db),
+):
+    payment = db.query(Payment).filter(Payment.payment_id == payment_id).first()
+    if not payment:
+        raise HTTPException(status_code=404, detail="Payment not found.")
+    if not payment.toss_payment_key:
+        raise HTTPException(status_code=400, detail="토스 결제 키를 찾을 수 없습니다.")
+
+    headers = {
+        "Authorization": get_toss_authorization_header(),
+        "Content-Type": "application/json",
+    }
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        toss_response = await client.post(
+            TOSS_CANCEL_URL.format(payment.toss_payment_key),
+            headers=headers,
+            json={"cancelReason": cancel_reason},
+        )
+
+    if toss_response.status_code >= 400:
+        raise HTTPException(status_code=toss_response.status_code, detail=toss_response.json())
+
+    payment.payment_status = "CANCELLED"
+
+    user = db.query(User).filter(User.user_id == payment.user_id).first()
+    if user:
+        user.subscription_end_date = None
+
+    try:
+        db.commit()
+    except SQLAlchemyError as error:
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Failed to cancel payment.") from error
+
+    return {"message": "결제가 취소되었습니다."}
