@@ -11,17 +11,8 @@ const formatDate = (dateText) => {
 };
 
 const getCurrentUserId = () => {
-  const userStorageKeys = ["user_id", "userId", "currentUserId", "loginUserId", "with-user-id"];
-
-  for (const storageKey of userStorageKeys) {
-    const userId = Number(localStorage.getItem(storageKey));
-
-    if (!Number.isNaN(userId) && userId > 0) {
-      return userId;
-    }
-  }
-
-  return null;
+  const userId = Number(localStorage.getItem("user_id"));
+  return Number.isNaN(userId) ? null : userId;
 };
 
 function CustomerService() {
