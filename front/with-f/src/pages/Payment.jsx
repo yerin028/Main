@@ -40,6 +40,15 @@ const paymentPlans = [
 
 const paymentFeatures = ["수어 학습", "수어 퀴즈", "수어 통역 서비스"];
 
+// 추가 - 플랜 이름 변환 함수
+function getPlanName(amount) {
+  if (amount === 4900)
+    return "스탠다드";
+  if (amount === 9900)
+    return "스탠다드 3개월";
+  return "이용권";
+}
+
 function loadTossPaymentSdk() {
   if (window.TossPayments) {
     return Promise.resolve(window.TossPayments);
@@ -84,11 +93,51 @@ function Payment() {
   const [selectedPlanId, setSelectedPlanId] = useState(defaultPlan.id);
   const [isPaying, setIsPaying] = useState(false);
   const hasConfirmedRef = useRef(false);
+  //추가
+  const [currentPayment, setCurrentPayment] = useState(null); // 현재 구독 정보
+  const [userInfo, setUserInfo] = useState(null); // 유저 정보
+  const [isChangingPlan, setIsChangingPlan] = useState(false); // 플랜 변경 모드
 
   const selectedPlan = useMemo(
     () => paymentPlans.find((paymentPlan) => paymentPlan.id === selectedPlanId),
     [selectedPlanId],
   );
+
+  // 추가
+  useEffect(() => {
+    const userId = Number(localStorage.getItem("user_id"));
+    if (!userId)
+      return;
+
+    const loadCurrentPayment = async () => {
+      try {
+        const response = await fetch (`${apiBaseUrl}/api/v1/payment?user_id=${userId}`);
+        if (!response.ok)
+          return;
+        const data = await response.json();
+        const latest = data.find((p) => p.payment_status === "DONE");
+        setCurrentPayment(latest || null) ;
+      } catch {
+        setCurrentPayment(null);
+      }
+    };
+
+    const loadUserInfo = async () => {
+      try {
+        const response = await fetch(`${apiBaseUrl}/api/v1/auth/me?user_id=${userId}`);
+        if (!response.ok)
+          return;
+        const data = await response.json();
+        setUserInfo(data);
+      } catch {
+        setUserInfo(null);
+      }
+    };
+
+    loadCurrentPayment();
+    loadUserInfo();
+  }, []);
+  //여기까지
 
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
@@ -134,6 +183,7 @@ function Payment() {
 
         alert("결제가 완료되었습니다.");
         window.history.replaceState(null, "", window.location.pathname);
+        window.location.reload(); //추가 - 결제 완료 후 페이지 새로고침
       } catch (error) {
         alert(error.message);
       } finally {
@@ -167,6 +217,28 @@ function Payment() {
       alert("VITE_TOSS_CLIENT_KEY를 설정해주세요.");
       return;
     }
+
+    // 추가 - 플랜 변경 시 기존 결제 취소
+    if (isChangingPlan && currentPayment) {
+      const confirmed = window.confirm(
+        `현재 ${getPlanName(currentPayment.amount)} 플랜을 취소하고 ${selectedPlan.title.replace("\n", " ")} 플랜으로 변경하시겠습니까?`
+      );
+      if (!confirmed)
+        return;
+
+      try {
+        const cancelRes = await fetch(
+          `${apiBaseUrl}/api/v1/payment/cancel?payment_id=${currentPayment.payment_id}&cancel_reason=플랜 변경`,
+          { method: "POST" }
+        );
+        if (!cancelRes.ok)
+          throw new Error("기존 결제 취소에 실패했습니다.");
+      } catch (error) {
+        alert(error.message);
+        return;
+      }
+    }
+    // 여기까지
 
     setIsPaying(true);
 
@@ -210,8 +282,52 @@ function Payment() {
     }
   };
 
+  // 추가
+  if (currentPayment && !isChangingPlan) {
+    const remainingDays = userInfo?.subscription_end_date
+    ? Math.max(0, Math.ceil((new Date(userInfo.subscription_end_date) - new Date()) / (1000 * 60 * 60 * 24))) 
+    : 0;
+
+  return (
+      <section className="payment-page" aria-label="결제 정보">
+        <div className="payment-current-plan">
+          <h2 className="payment-current-title">현재 구독 중인 플랜</h2>
+          <div className="payment-current-info">
+            <p>이용 중인 플랜 · <strong>{getPlanName(currentPayment.amount)}</strong></p>
+            <p>결제일 · {new Date(currentPayment.paid_at).toLocaleDateString("ko-KR")}</p>
+            <p>만료일 · {userInfo?.subscription_end_date
+              ? new Date(userInfo.subscription_end_date).toLocaleDateString("ko-KR")
+              : "-"}</p>
+            <p>잔여 기간 · <strong>{remainingDays}일</strong></p>
+          </div>
+          <button
+            className="payment-change-button"
+            type="button"
+            onClick={() => setIsChangingPlan(true)}
+          >
+            플랜 변경하기
+          </button>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="payment-page" aria-label="결제 정보">
+      {/* 추가 - 플랜 변경 안내 */}
+      {isChangingPlan && (
+        <div className="payment-change-notice">
+          <p>⚠️ 플랜 변경 시 기존 구독이 취소되고 새 플랜으로 변경됩니다.</p>
+          <button
+            className="payment-back-button"
+            type="button"
+            onClick={() => setIsChangingPlan(false)}
+          >
+            돌아가기
+          </button>
+        </div>
+      )}
+
       <div className="payment-card-list">
         {paymentPlans.map((paymentPlan) => {
           const isSelected = paymentPlan.id === selectedPlanId;
@@ -264,7 +380,8 @@ function Payment() {
         disabled={isPaying}
         onClick={handlePaymentClick}
       >
-        {isPaying ? "결제 처리 중" : "결제하기"}
+        {/* 수정 - 플랜 변경 모드일 때 버튼 텍스트 변경 */}
+        {isPaying ? "결제 처리 중" : isChangingPlan ? "플랜 변경 결제하기" : "결제하기"}
       </button>
     </section>
   );

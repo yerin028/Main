@@ -1,3 +1,6 @@
+/* 추가 */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap');
+
 .payment-page {
   width: min(828px, calc(100% - 55px));
   margin: 37px auto 0;
@@ -132,6 +135,7 @@
   cursor: pointer;
   font-size: 23px;
   font-weight: 800;
+  font-family: "Noto Sans KR", sans-serif; /* 추가 */
   box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.1);
 }
 
@@ -181,4 +185,69 @@
     margin-top: 27px;
     font-size: 27px;
   }
+}
+
+/* 추가 - 구독 중인 사용자 화면 */
+.payment-current-plan {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 40px;
+  border: 1.5px solid #b8cce8;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.payment-current-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: #1a2e55;
+  margin-bottom: 24px;
+}
+
+.payment-current-info {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 32px;
+  font-size: 15px;
+  color: #4a5568;
+}
+
+.payment-change-button {
+  width: 100%;
+  padding: 14px;
+  background: #1a2e55;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.payment-change-button:hover {
+  opacity: 0.85;
+}
+
+.payment-change-notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff3e0;
+  border: 1px solid #ffb74d;
+  border-radius: 8px;
+  padding: 12px 20px;
+  margin-bottom: 24px;
+  font-size: 14px;
+  color: #7b4f00;
+}
+
+.payment-back-button {
+  background: none;
+  border: 1px solid #7b4f00;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 13px;
+  color: #7b4f00;
+  cursor: pointer;
 }
