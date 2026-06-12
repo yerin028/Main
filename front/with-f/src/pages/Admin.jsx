@@ -82,6 +82,7 @@ function Admin() {
   );
 
   const selectedAnswer = selectedQuestion?.answers?.[selectedQuestion.answers.length - 1] || null;
+  const selectedQuestionAnswered = hasAnswer(selectedQuestion);
 
   const filteredQuestions = useMemo(() => {
     const keyword = searchText.trim().toLowerCase();
@@ -187,6 +188,11 @@ function Admin() {
   const handleAnswerSubmit = async () => {
     if (!selectedQuestion) {
       alert("답변할 문의를 선택해주세요.");
+      return;
+    }
+
+    if (selectedQuestionAnswered) {
+      alert("이미 답변이 완료된 문의입니다.");
       return;
     }
 
@@ -331,7 +337,7 @@ function Admin() {
       <main className="admin-main">
         <div className="admin-title-row">
           <div>
-            <h1>관리자모드</h1>
+            <h1>서비스 관리</h1>
             <p>고객센터에 등록된 실제 문의를 확인하고 답변을 처리합니다.</p>
           </div>
           <button className="admin-outline-action" type="button" onClick={() => setAdminView("refunds")}>
@@ -498,18 +504,20 @@ function Admin() {
                   </div>
                 )}
 
-                <div className="admin-answer-area">
-                  <h3 className="admin-detail-title">답변 작성</h3>
-                  <textarea
-                    className="admin-answer-input"
-                    value={answerText}
-                    placeholder="답변 내용을 입력해주세요"
-                    onChange={(event) => setAnswerText(event.target.value)}
-                  />
-                  <button className="admin-answer-button" type="button" onClick={handleAnswerSubmit}>
-                    답변 등록
-                  </button>
-                </div>
+                {!selectedQuestionAnswered && (
+                  <div className="admin-answer-area">
+                    <h3 className="admin-detail-title">답변 작성</h3>
+                    <textarea
+                      className="admin-answer-input"
+                      value={answerText}
+                      placeholder="답변 내용을 입력해주세요"
+                      onChange={(event) => setAnswerText(event.target.value)}
+                    />
+                    <button className="admin-answer-button" type="button" onClick={handleAnswerSubmit}>
+                      답변 등록
+                    </button>
+                  </div>
+                )}
               </>
             ) : (
               <div className="admin-empty-detail">선택된 문의가 없습니다.</div>
