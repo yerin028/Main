@@ -39,6 +39,7 @@ function Quiz() {
   const [isAnswerChecked, setIsAnswerChecked] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
+  const [quizAnswers, setQuizAnswers] = useState({});
 
   const selectedCategory = useMemo(
     () => categories.find((category) => category.category_id === categoryIdFromUrl),
@@ -47,6 +48,7 @@ function Quiz() {
 
   const currentQuiz = useMemo(() => quizzes[selectedQuizIndex], [quizzes, selectedQuizIndex]);
   const pageNumbers = useMemo(() => quizzes.map((_, index) => index + 1), [quizzes]);
+  const progressPercent = quizzes.length > 0 ? ((selectedQuizIndex + 1) / quizzes.length) * 100 : 0;
 
   useEffect(() => {
     const loadCategories = async () => {
@@ -75,6 +77,8 @@ function Quiz() {
       setSelectedQuizIndex(0);
       setSelectedOption(null);
       setIsAnswerChecked(false);
+      setIsCorrect(false);
+      setQuizAnswers({});
       return;
     }
 
@@ -95,6 +99,8 @@ function Quiz() {
     setSelectedQuizIndex(0);
     setSelectedOption(null);
     setIsAnswerChecked(false);
+    setIsCorrect(false);
+    setQuizAnswers({});
   }, [categoryIdFromUrl]);
 
   const selectCategory = (categoryId) => {
@@ -107,15 +113,41 @@ function Quiz() {
 
   const goToQuiz = (nextIndex) => {
     if (nextIndex < 0 || nextIndex >= quizzes.length) return;
+    const nextQuiz = quizzes[nextIndex];
+    const savedAnswer = quizAnswers[nextQuiz.quiz_id];
+
     setSelectedQuizIndex(nextIndex);
-    setSelectedOption(null);
-    setIsAnswerChecked(false);
+    setSelectedOption(savedAnswer?.selectedOption ?? null);
+    setIsAnswerChecked(savedAnswer?.isAnswerChecked ?? false);
+    setIsCorrect(savedAnswer?.isCorrect ?? false);
     setShowModal(false);
   };
 
   const handleOptionClick = (option) => {
     if (isAnswerChecked) return;
     setSelectedOption(option);
+    setQuizAnswers((prevAnswers) => ({
+      ...prevAnswers,
+      [currentQuiz.quiz_id]: {
+        selectedOption: option,
+        isAnswerChecked: false,
+        isCorrect: false,
+      },
+    }));
+  };
+
+  const resetCurrentQuiz = () => {
+    if (!currentQuiz) return;
+
+    setSelectedOption(null);
+    setIsAnswerChecked(false);
+    setIsCorrect(false);
+    setShowModal(false);
+    setQuizAnswers((prevAnswers) => {
+      const nextAnswers = { ...prevAnswers };
+      delete nextAnswers[currentQuiz.quiz_id];
+      return nextAnswers;
+    });
   };
 
   const handleCheckAnswer = async () => {
@@ -125,6 +157,14 @@ function Quiz() {
     setIsCorrect(correct);
     setIsAnswerChecked(true);
     setShowModal(true);
+    setQuizAnswers((prevAnswers) => ({
+      ...prevAnswers,
+      [currentQuiz.quiz_id]: {
+        selectedOption,
+        isAnswerChecked: true,
+        isCorrect: correct,
+      },
+    }));
 
     // Backend sync (Requirement: POST /api/v1/quiz/results)
     try {
@@ -171,6 +211,10 @@ function Quiz() {
     <section className="quiz-page quiz-study-page">
       <div className="quiz-study-toolbar">
         <div className="quiz-toolbar-left">
+            <button className="quiz-back-button" type="button" onClick={goBackToCategories}>
+              <span aria-hidden="true">←</span>
+              뒤로가기
+            </button>
             <span className="quiz-current-category">현재 카테고리: <strong>{selectedCategory?.name}</strong></span>
         </div>
         <div className="quiz-toolbar-right">
@@ -204,7 +248,7 @@ function Quiz() {
         </div>
 
         <article className="quiz-options-card">
-          <p>다음 수어가 의미하는 것은?</p>
+          <p className="quiz-question-title">다음 수어가 의미하는 것은?</p>
           <div className="quiz-options-list">
             {currentQuiz?.options.map((option, index) => {
               let statusClass = '';
@@ -224,10 +268,28 @@ function Quiz() {
                   disabled={isAnswerChecked}
                 >
                   <span className="option-index">{index + 1}</span>
-                  {option}
+                  <span className="option-text">{option}</span>
                 </button>
               );
             })}
+          </div>
+          <div className="quiz-option-bottom">
+            <p className="quiz-option-guide">
+              <span aria-hidden="true">i</span>
+              {selectedOption === null
+                ? '보기를 선택하면 정답 확인을 할 수 있습니다.'
+                : isAnswerChecked
+                  ? '결과를 확인한 뒤 다음 문제로 이동할 수 있습니다.'
+                  : '선택한 답을 확인하려면 정답 확인을 눌러주세요.'}
+            </p>
+            <button
+              className="quiz-reset-button"
+              type="button"
+              onClick={resetCurrentQuiz}
+              disabled={selectedOption === null && !isAnswerChecked}
+            >
+              초기화
+            </button>
           </div>
         </article>
       </div>
@@ -255,7 +317,13 @@ function Quiz() {
       </div>
 
       <div className="quiz-progress-section">
-          <strong>진행률</strong>
+          <div className="quiz-progress-heading">
+            <strong>진행률</strong>
+            <span>{selectedQuizIndex + 1} / {quizzes.length}</span>
+          </div>
+          <div className="quiz-progress-track" aria-hidden="true">
+            <span style={{ width: `${progressPercent}%` }} />
+          </div>
           <div className="quiz-page-numbers">
             {pageNumbers.map((pageNumber, index) => (
               <button
@@ -269,10 +337,6 @@ function Quiz() {
             ))}
           </div>
       </div>
-
-      <button className="quiz-back-button" type="button" onClick={goBackToCategories}>
-        뒤로가기
-      </button>
 
       {showModal && (
         <div className="quiz-modal-overlay" onClick={closeModal}>
