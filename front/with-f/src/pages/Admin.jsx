@@ -75,6 +75,8 @@ function Admin() {
   const [searchText, setSearchText] = useState("");
   const [questionFilter, setQuestionFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
+  const [refundPage, setRefundPage] = useState(1);
+  const refundPageSize = 10;
 
   const selectedQuestion = useMemo(
     () => questions.find((question) => question.question_id === selectedQuestionId),
@@ -267,6 +269,10 @@ function Admin() {
   }
 
   if (adminView === "refunds") {
+
+    const totalRefundPages = Math.max(1, Math.ceil(refundRequests.length / refundPageSize));
+    const visibleRefundRequests = refundRequests.slice((refundPage - 1) * refundPageSize, refundPage * refundPageSize);
+
     return (
       <section className="admin-page">
         <main className="admin-main">
@@ -296,7 +302,7 @@ function Admin() {
               {refundRequests.length === 0 ? (
                 <div className="admin-empty-row">등록된 환불 요청이 없습니다.</div>
               ) : (
-                refundRequests.map((refundRequest) => (
+                visibleRefundRequests.map((refundRequest) => (
                   <div className="admin-refund-row" key={refundRequest.refund_id}>
                     <span>{refundRequest.refund_id}</span>
                     <span>{getWriterName(refundRequest)}</span>
@@ -326,6 +332,35 @@ function Admin() {
                 ))
               )}
             </div>
+
+            {totalRefundPages > 1 && (
+              <div className="admin-pagination" aria-label="환불 페이지">
+                <button
+                  type="button"
+                  disabled={refundPage === 1}
+                  onClick={() => setRefundPage((page) => Math.max(1, page - 1))}
+                >
+                  ‹
+                </button>
+                {Array.from({ length: totalRefundPages }, (_, index) => (
+                  <button
+                    className={refundPage === index + 1 ? "admin-page-number-active" : ""}
+                    key={index + 1}
+                    type="button"
+                    onClick={() => setRefundPage(index + 1)}
+                  >
+                    {index + 1}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  disabled={refundPage === totalRefundPages}
+                  onClick={() => setRefundPage((page) => Math.min(totalRefundPages, page + 1))}
+                >
+                  ›
+                </button>
+              </div>
+            )}
           </div>
         </main>
       </section>
