@@ -678,4 +678,74 @@
   .quiz-category-grid { grid-template-columns: 1fr; }
 }
 
+/* 추가 - 구독 안내 모달 */
+.quiz-subscribe-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(7, 22, 49, 0.6);
+  backdrop-filter: blur(2px);
+}
 
+.quiz-subscribe-modal {
+  width: min(420px, 90%);
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 40px 36px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(7, 22, 49, 0.25);
+}
+
+.quiz-subscribe-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.quiz-subscribe-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: #071631;
+  margin: 0 0 12px;
+}
+
+.quiz-subscribe-message {
+  font-size: 15px;
+  color: #52617a;
+  margin: 0 0 32px;
+  line-height: 1.6;
+}
+
+.quiz-subscribe-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.quiz-subscribe-cancel {
+  padding: 12px;
+  border: 2px solid #062a61;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #062a61;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.quiz-subscribe-confirm {
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  background: #062a61;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.quiz-subscribe-confirm:hover {
+  background: #041f49;
+}
