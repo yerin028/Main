@@ -112,7 +112,7 @@ const isSubscribed = remainingDays > 0;
     return (
         <div className="home-wrapper">
             <div className="home-greeting">
-                <h2>안녕하세요</h2>
+                <h2>{userInfo?.name ? `${userInfo.name}님, 안녕하세요!` : '안녕하세요!'}</h2>
                 <p>오늘도 수어로 소통해요</p>
             </div>
 
