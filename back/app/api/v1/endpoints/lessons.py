@@ -10,6 +10,12 @@ from app.core.mongo_database import (
     get_lessons_collection,
     get_mongo_collection,
 )
+# 수정 - 카테고리/매핑은 공통 파일에서 import
+from app.core.lesson_categories import (
+    DEFAULT_LESSON_CATEGORIES,
+    LESSON_CATEGORY_SOURCE_MAP,
+    get_lesson_query,
+)
 from app.schemas.lessons import (
     LessonCategorySchema,
     LessonDetailSchema,
@@ -23,34 +29,10 @@ router = APIRouter()
 
 LESSON_PROGRESS_COLLECTION = "lesson_progress"
 
-
-DEFAULT_LESSON_CATEGORIES = [
-    {"category_id": 1, "name": "사회생활", "description": "사회생활 표현을 학습합니다.", "sort_order": 1},
-    {"category_id": 2, "name": "일상생활", "description": "일상생활 표현을 학습합니다.", "sort_order": 2},
-    {"category_id": 3, "name": "삶/가족", "description": "삶과 가족 관련 표현을 학습합니다.", "sort_order": 3},
-    {"category_id": 4, "name": "교육/정보", "description": "교육과 정보통신 표현을 학습합니다.", "sort_order": 4},
-    {"category_id": 5, "name": "교통/지역", "description": "교통과 지역 표현을 학습합니다.", "sort_order": 5},
-    {"category_id": 6, "name": "개념/자연", "description": "개념과 자연 표현을 학습합니다.", "sort_order": 6},
-    {"category_id": 7, "name": "인간/감정", "description": "인간과 감정 표현을 학습합니다.", "sort_order": 7},
-    {"category_id": 8, "name": "기타/문화", "description": "기타와 문화 표현을 학습합니다.", "sort_order": 8},
-]
-
-
-LESSON_CATEGORY_SOURCE_MAP = {
-    1: ["사회생활"],
-    2: ["경제생활", "식생활", "의생활", "주생활", "의학"],
-    3: ["삶"],
-    4: ["교육", "정보통신"],
-    5: ["교통", "나라명 및 지명"],
-    6: ["개념", "자연"],
-    7: ["인간"],
-    8: ["기타", "문화"],
-}
+# 수정 - DEFAULT_LESSON_CATEGORIES, LESSON_CATEGORY_SOURCE_MAP 정의 삭제 (위에서 import)
 
 
 def ensure_default_lesson_data():
-    # 카테고리 컬렉션만 기본값을 보정합니다.
-    # lesson 영상 데이터는 국립수어원 API 호출 없이 MongoDB에 저장된 값만 사용합니다.
     category_collection = get_lesson_categories_collection()
     lesson_collection = get_lessons_collection()
 
@@ -145,21 +127,6 @@ def is_valid_category_lesson(document, category_id: int | None) -> bool:
         return False
 
     return source_category in allowed_source_categories
-
-
-def get_lesson_query(category_id: int | None) -> dict:
-    source_categories = sorted({
-        source_category
-        for category_sources in LESSON_CATEGORY_SOURCE_MAP.values()
-        for source_category in category_sources
-    })
-    mongo_query = {
-        "video_url": {"$exists": True, "$nin": [None, ""]},
-        "category_name": {"$in": source_categories},
-    }
-    if category_id is not None:
-        mongo_query["category_name"] = {"$in": LESSON_CATEGORY_SOURCE_MAP.get(category_id, [])}
-    return mongo_query
 
 
 def find_lesson_by_id(dictionary_collection, lesson_collection, lesson_id: int):
@@ -385,12 +352,12 @@ async def read_lesson_detail(lesson_id: int):
 
     return LessonDetailSchema(**convert_lesson_detail_document(lesson, category))
 
+
 @router.get("/progress/today-stats")
 async def get_today_progress_stats(user_id: int = Query(...)):
     try:
         progress_collection = get_lesson_progress_collection()
 
-        # 한국 시간 기준 오늘 날짜
         from datetime import timedelta
         korea_now = datetime.now(timezone.utc) + timedelta(hours=9)
         today = korea_now.strftime("%Y-%m-%d")
