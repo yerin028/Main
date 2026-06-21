@@ -24,6 +24,12 @@ router = APIRouter()
 # .env 파일 로드
 load_dotenv()
 
+# 백엔드 루트 및 디버깅 파일 경로 동적 생성
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+BACK_DIR = os.path.abspath(os.path.join(CURRENT_DIR, "..", "..", "..", ".."))
+DEBUG_LOG_PATH = os.path.join(BACK_DIR, "interpreter_debug.log")
+DEBUG_CAPTURE_PATH = os.path.join(BACK_DIR, "debug_capture.jpg")
+
 # 환경 변수에서 값 가져오기
 azure_client = AzureOpenAI(
     azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
@@ -46,7 +52,7 @@ MAX_HISTORY_LEN = 8
 
 # 로컬 수어 규칙 검증기: 번역 단어의 요구 동작(양손 여부, 수형, 액션)과 실제 사용자의 동작이 일치하는지 MongoDB Parsed_Rules 대조 검증
 def validate_sign_rules(word_name: str, payload: list) -> bool:
-    debug_log_path = "C:/Users/ssjin/Desktop/Main/back/interpreter_debug.log"
+    debug_log_path = DEBUG_LOG_PATH
     try:
         rule_doc = db['Parsed_Rules'].find_one({"word_name": word_name})
         if not rule_doc:
@@ -240,9 +246,15 @@ def clean_ai_reply(reply: str) -> str:
 # OpenAI 호출을 재사용하기 위해 분리한 헬퍼 함수
 def call_openai_model(payload: list, category: str) -> str:
     try:
+        # 학습 시 사용한 system prompt와 동일하게 system role 메시지 추가
+        system_content = f"너는 [{category}] 카테고리에 속한 수어 동작을 판별하는 전문가 AI이다. 입력받은 단계별 수형(right_hand, left_hand), 위치(position), 움직임(action) JSON 규칙을 분석하여 이와 일치하는 한국어 수어 단어명 하나만 정확히 리턴해라."
         response = azure_client.chat.completions.create(
             model=DEPLOYMENT_NAME,
             messages=[
+                {
+                    "role": "system",
+                    "content": system_content
+                },
                 {
                     "role": "user", 
                     "content": f"카테고리: {category} | 행동 명세 데이터: {json.dumps(payload, ensure_ascii=False)}"
@@ -381,7 +393,7 @@ def predict_sign_language_to_korean(image_data: str, category: str = "개념", c
         if img is None:
             raise ValueError("Decoded image is empty.")
         # 디버깅을 위해 프론트로부터 수신한 이미지 디스크 저장
-        cv2.imwrite("C:/Users/ssjin/Desktop/Main/back/debug_capture.jpg", img)
+        cv2.imwrite(DEBUG_CAPTURE_PATH, img)
     except Exception as e:
         raise ValueError(f"Failed to decode base64 image: {str(e)}")
 
@@ -414,7 +426,7 @@ def predict_sign_language_to_korean(image_data: str, category: str = "개념", c
     current_frame_landmarks = {"right": None, "left": None}
 
     # 디버깅용 텍스트 파일 경로
-    debug_log_path = "C:/Users/ssjin/Desktop/Main/back/interpreter_debug.log"
+    debug_log_path = DEBUG_LOG_PATH
 
     if hand_results.multi_hand_landmarks and hand_results.multi_handedness:
         for idx, hand_handedness in enumerate(hand_results.multi_handedness):
@@ -469,12 +481,13 @@ def predict_sign_language_to_korean(image_data: str, category: str = "개념", c
             if is_4_open: opened_fingers.append("4")
             if is_5_open: opened_fingers.append("5")
 
+            # 학습 데이터셋 형식에 맞춰 shapes와 positions 변환
             if len(opened_fingers) == 0:
-                shape_str = "주먹"
+                shape_str = "fist"
             elif len(opened_fingers) >= 4:
-                shape_str = "편 손"
+                shape_str = "open_palm"
             else:
-                shape_str = "·".join(opened_fingers) + "지"
+                shape_str = ", ".join([f"{f}지" for f in opened_fingers])
             
             # B) 손의 상대적 위치 계산 (신체 상대 좌표 기준 - 어깨선과 어깨/골반 중간선 적용)
             avg_x = sum([lm.x for lm in landmarks]) / 21
@@ -486,7 +499,7 @@ def predict_sign_language_to_korean(image_data: str, category: str = "개념", c
             elif avg_y < chest_hip_mid:
                 pos_str = "chest"
             else:
-                pos_str = "belly"
+                pos_str = "none"  # 학습 데이터셋의 하단 기본값은 none입니다.
             
             # C) 접촉(touching) 판정 로직
             touch_str = "none"
@@ -595,56 +608,64 @@ def predict_sign_language_to_korean(image_data: str, category: str = "개념", c
     except Exception:
         pass
 
-    # 병렬 다중 매칭 후보 페이로드 구성 (Rate Limit 예방을 위해 최대 2개 핵심 조합으로 압축)
+    # 병렬 다중 매칭 후보 페이로드 구성 (학습 포맷에 맞춰 description 추가 및 노이즈 보정 후보 구성)
     candidates = []
     
-    # 0. 원본 페이로드
-    candidates.append(("original", live_action_payload))
+    # 0. 원본 페이로드 (with auto-generated description)
+    p_original = [
+        {
+            "step": 1,
+            "right_hand": live_action_payload[0]["right_hand"].copy(),
+            "left_hand": live_action_payload[0]["left_hand"].copy(),
+            "action": action_type
+        }
+    ]
+    p_original[0]["description"] = generate_behavior_description(p_original)
+    candidates.append(("original", p_original))
     
     # 오른손 또는 왼손 중 하나라도 감지된 경우에만 보정 시작
     r_f = live_action_payload[0]["right_hand"].copy()
     l_f = live_action_payload[0]["left_hand"].copy()
     act = action_type
 
+    # 1) 접촉 노이즈 보정 후보 (contact <-> near 교차 대입)
     r_f_alt = r_f.copy()
     l_f_alt = l_f.copy()
-    modified = False
+    touch_modified = False
 
-    # 1) 수형 보정 ("주먹" -> "fist", "편 손" -> "open_palm", "5지" -> "open_palm")
-    if r_f_alt["shape"] == "주먹":
-        r_f_alt["shape"] = "fist"
-        modified = True
-    elif r_f_alt["shape"] in ["편 손", "5지"]:
-        r_f_alt["shape"] = "open_palm"
-        modified = True
-
-    if l_f_alt["shape"] == "주먹":
-        l_f_alt["shape"] = "fist"
-        modified = True
-    elif l_f_alt["shape"] in ["편 손", "5지"]:
-        l_f_alt["shape"] = "open_palm"
-        modified = True
-
-    # 2) 위치 보정 ("face" -> "cheek")
-    if r_f_alt["position"] == "face":
-        r_f_alt["position"] = "cheek"
-        modified = True
-    if l_f_alt["position"] == "face":
-        l_f_alt["position"] = "cheek"
-        modified = True
-
-    # 3) 접촉 보정 ("contact" -> "near")
     if r_f_alt["touching"] == "contact":
         r_f_alt["touching"] = "near"
-        modified = True
+        touch_modified = True
+    elif r_f_alt["touching"] == "near":
+        r_f_alt["touching"] = "contact"
+        touch_modified = True
+
     if l_f_alt["touching"] == "contact":
         l_f_alt["touching"] = "near"
-        modified = True
+        touch_modified = True
+    elif l_f_alt["touching"] == "near":
+        l_f_alt["touching"] = "contact"
+        touch_modified = True
 
-    if modified:
-        candidates.append(("normalized", [
+    if touch_modified:
+        p_touch = [
             {"step": 1, "right_hand": r_f_alt, "left_hand": l_f_alt, "action": act}
-        ]))
+        ]
+        p_touch[0]["description"] = generate_behavior_description(p_touch)
+        candidates.append(("touch_alt", p_touch))
+
+    # 2) 액션 움직임 노이즈 보정 후보 (움직임 감지되었을 때 정지 상태 "none"로도 매칭)
+    if act != "none":
+        p_action = [
+            {
+                "step": 1,
+                "right_hand": r_f.copy(),
+                "left_hand": l_f.copy(),
+                "action": "none"
+            }
+        ]
+        p_action[0]["description"] = generate_behavior_description(p_action)
+        candidates.append(("action_alt", p_action))
 
     # 중복 제거
     unique_candidates = []
@@ -821,7 +842,7 @@ async def translate_sign_language(
         # 500 에러 세부 트래킹 로깅
         import traceback
         try:
-            with open("C:/Users/ssjin/Desktop/Main/back/interpreter_debug.log", "a", encoding="utf-8") as f:
+            with open(DEBUG_LOG_PATH, "a", encoding="utf-8") as f:
                 f.write(f"[{datetime.now()}] ERROR IN INTERPRETER: {str(exc)}\n")
                 f.write(traceback.format_exc())
                 f.write("\n")
