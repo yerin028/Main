@@ -68,6 +68,8 @@ async def kakao_login(code: str, db: Session = Depends(get_db)):
     token_data = token_response.json()
     print("카카오 토큰 데이터:", token_data)
     access_token = token_data.get("access_token")
+    if not access_token:
+        raise HTTPException(status_code=400, detail=f"Failed to get Kakao access token: {token_data.get('error_description', 'Unknown error')}")
     print("카카오 액세스 토큰:", access_token)
 
     # 2. 토큰으로 사용자 정보 가져오기
@@ -79,10 +81,11 @@ async def kakao_login(code: str, db: Session = Depends(get_db)):
     print("카카오 유저 데이터:", user_data)  
 
     # 3. 사용자 정보 DB
-    kakao_id = str(user_data.get("id"))
-    # nickname = user_data.get("kakao_account", {}).get("profile", {}).get("nickname")
+    kakao_id = user_data.get("id")
+    if not kakao_id:
+        raise HTTPException(status_code=400, detail="Failed to retrieve Kakao user info")
+    kakao_id = str(kakao_id)
     
-    # 변경된 부분 (핵심)
     nickname = (
         user_data
         .get("kakao_account", {})
@@ -113,11 +116,13 @@ async def naver_login(code: str, state: str, db: Session = Depends(get_db)):
         token_data = token_response.json()
         print("네이버 토큰 데이터:", token_data)
         access_token = token_data.get("access_token")
+        if not access_token:
+            raise HTTPException(status_code=400, detail=f"Failed to get Naver access token: {token_data.get('error_description', 'Unknown error')}")
 
         # 2. 토큰으로 사용자 정보 가져오기
         async with httpx.AsyncClient() as client:
             user_response = await client.get(
-                "https://openapi.naver.com/v1/nid/me", # 이건 뭥미
+                "https://openapi.naver.com/v1/nid/me",
                 headers={"Authorization": f"Bearer {access_token}"}
             )
         user_data = user_response.json()
@@ -125,6 +130,8 @@ async def naver_login(code: str, state: str, db: Session = Depends(get_db)):
 
         # 3. 사용자 정보
         naver_id = user_data.get("response", {}).get("id")
+        if not naver_id:
+            raise HTTPException(status_code=400, detail="Failed to retrieve Naver user info")
         nickname = user_data.get("response", {}).get("nickname")
         email = user_data.get("response", {}).get("email")
 
@@ -150,6 +157,8 @@ async def google_login(code: str, db: Session = Depends(get_db)):
     token_data = token_response.json()
     print("구글 토큰 데이터:", token_data)
     access_token = token_data.get("access_token")
+    if not access_token:
+        raise HTTPException(status_code=400, detail=f"Failed to get Google access token: {token_data.get('error_description', 'Unknown error')}")
 
     # 2. 토큰으로 사용자 정보 가져오기
     async with httpx.AsyncClient() as client:
@@ -161,6 +170,8 @@ async def google_login(code: str, db: Session = Depends(get_db)):
     print("구글 유저 데이터:", user_data)
 
     google_id = user_data.get("id")
+    if not google_id:
+        raise HTTPException(status_code=400, detail="Failed to retrieve Google user info")
     email = user_data.get("email")
     nickname = user_data.get("name")
 
@@ -169,6 +180,9 @@ async def google_login(code: str, db: Session = Depends(get_db)):
 
 # 탈퇴 여부 체크
 def save_or_get_user(db: Session, social_provider: str, social_id: str, name: str, email: str = None):
+    if not social_id:
+        raise HTTPException(status_code=400, detail="Social ID is required")
+
     # 이미 가입한 유저인지 확인
     existing_user = db.query(User).filter(
         User.social_id == social_id,

@@ -29,7 +29,6 @@ load_dotenv()
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 BACK_DIR = os.path.abspath(os.path.join(CURRENT_DIR, "..", "..", "..", ".."))
 DEBUG_LOG_PATH = os.path.join(BACK_DIR, "interpreter_debug.log")
-DEBUG_CAPTURE_PATH = os.path.join(BACK_DIR, "debug_capture.jpg")
 
 # 환경 변수에서 값 가져오기
 azure_client = AzureOpenAI(
@@ -416,10 +415,6 @@ def predict_sign_language_to_korean(image_data_input: Union[str, list[str]], cat
             img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
             if img is None:
                 continue
-            
-            # 디버깅을 위해 프론트로부터 수신한 이미지 중 마지막 이미지를 저장
-            if frame_idx == len(image_data_list) - 1:
-                cv2.imwrite(DEBUG_CAPTURE_PATH, img)
         except Exception as e:
             print(f"Failed to decode frame {frame_idx}: {e}")
             continue
