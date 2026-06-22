@@ -38,6 +38,7 @@ function NaverCallback() {
             navigate('/home');
         })
         .catch(err => {
+            localStorage.clear();
             alert(err.message || '로그인 실패');
             navigate('/');
         });

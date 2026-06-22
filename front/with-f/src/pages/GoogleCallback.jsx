@@ -14,7 +14,12 @@ function GoogleCallback() {
         fetch(`http://localhost:8000/api/v1/auth/login/google?code=${code}`, {
             method: 'POST'
         })
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) {
+                    return res.json().then(err => { throw new Error(err.detail); });
+                }
+                return res.json();
+            })
             .then(data => {
                 console.log('구글 로그인 성공:', data);
                 if (data.user_id) {
@@ -33,6 +38,9 @@ function GoogleCallback() {
             })
             .catch(err => {
                 console.error('구글 로그인 실패:', err);
+                localStorage.clear();
+                alert(err.message || '로그인 실패');
+                navigate('/');
             });
     }, []);
 
