@@ -94,7 +94,7 @@ async def kakao_login(code: str, db: Session = Depends(get_db)):
     )
 
     user = save_or_get_user(db, "kakao", kakao_id, nickname)
-    return {"user_id": user.user_id, "kakao_id": kakao_id, "nickname": nickname}
+    return {"user_id": user.user_id, "kakao_id": kakao_id, "nickname": nickname, "role": user.role}
 
 
 # 네이버
@@ -136,7 +136,7 @@ async def naver_login(code: str, state: str, db: Session = Depends(get_db)):
         email = user_data.get("response", {}).get("email")
 
         user = save_or_get_user(db, "naver", naver_id, nickname, email)
-        return {"user_id": user.user_id, "naver_id": naver_id, "nickname": nickname, "email": email}
+        return {"user_id": user.user_id, "naver_id": naver_id, "nickname": nickname, "email": email, "role": user.role}
     
 
 # 구글
@@ -176,7 +176,7 @@ async def google_login(code: str, db: Session = Depends(get_db)):
     nickname = user_data.get("name")
 
     user = save_or_get_user(db, "google", google_id, nickname, email)
-    return {"user_id": user.user_id, "google_id": google_id, "email": email, "nickname": nickname}
+    return {"user_id": user.user_id, "google_id": google_id, "email": email, "nickname": nickname, "role": user.role}
 
 # 탈퇴 여부 체크
 def save_or_get_user(db: Session, social_provider: str, social_id: str, name: str, email: str = None):
@@ -234,4 +234,5 @@ def get_user(user_id: int, db: Session = Depends(get_db)):
         "customer_key": user.customer_key,
         "billing_key": user.billing_key,
         "subscription_end_date": str(user.subscription_end_date) if user.subscription_end_date else None,
+        "role": user.role,
     }

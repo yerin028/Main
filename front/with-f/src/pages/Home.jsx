@@ -75,6 +75,9 @@ function Home() {
                 if (!response.ok) return;
                 const data = await response.json();
                 setUserInfo(data);
+                if (data.role) {
+                    localStorage.setItem("user_role", data.role);
+                }
             } catch {
                 setUserInfo(null);
             }
