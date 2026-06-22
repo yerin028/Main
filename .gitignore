@@ -22,3 +22,6 @@ Thumbs.db
 # 로그
 *.log
 front/with-f/.env
+
+# 키 파일
+*.pem
