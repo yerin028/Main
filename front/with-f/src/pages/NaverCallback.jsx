@@ -32,6 +32,9 @@ function NaverCallback() {
             if (data.email) {
                 localStorage.setItem("user_email", data.email);
             }
+            if (data.role) {
+                localStorage.setItem("user_role", data.role);
+            }
             navigate('/home');
         })
         .catch(err => {

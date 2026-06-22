@@ -24,6 +24,9 @@ function KakaoCallback() {
             if (data.nickname) {
               localStorage.setItem("user_name", data.nickname);
             }
+            if (data.role) {
+              localStorage.setItem("user_role", data.role);
+            }
             navigate('/home');
         })
         .catch(err => {
