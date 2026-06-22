@@ -220,4 +220,4 @@ def get_user(user_id: int, db: Session = Depends(get_db)):
         "customer_key": user.customer_key,
         "billing_key": user.billing_key,
         "subscription_end_date": str(user.subscription_end_date) if user.subscription_end_date else None,
-    }
+    }

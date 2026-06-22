@@ -148,6 +148,7 @@ function CustomerService() {
         setPaymentInfo(null);
     }
   };
+  loadPaymentInfo();
 
   return (
     <section className="customer-service-page" aria-label="고객센터">
