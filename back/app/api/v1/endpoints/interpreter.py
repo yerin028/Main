@@ -28,7 +28,7 @@ load_dotenv()
 # 백엔드 루트 및 디버깅 파일 경로 동적 생성
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 BACK_DIR = os.path.abspath(os.path.join(CURRENT_DIR, "..", "..", "..", ".."))
-DEBUG_LOG_PATH = os.path.join(BACK_DIR, "interpreter_debug.log")
+DEBUG_LOG_PATH = os.devnull
 
 # 환경 변수에서 값 가져오기
 azure_client = AzureOpenAI(
