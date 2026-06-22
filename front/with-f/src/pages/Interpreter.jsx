@@ -101,19 +101,38 @@ function Interpreter() {
     return canvas.toDataURL('image/jpeg', 0.88);
   };
 
-  // 번역하기 버튼을 눌렀을 때 실행되는 단발성 번역 함수입니다.
+  // 번역하기 버튼을 눌렀을 때 실행되는 번역 함수입니다.
+  // 1.5초 동안 10개의 프레임을 연속 캡처하여 백엔드에 다단계(Multi-step) 정보로 전달합니다.
   const handleTranslate = async () => {
     setErrorMessage('');
     setCameraStatus('translating');
 
     try {
-      const imageData = captureFrame();
+      const frames = [];
+      const numFrames = 10;
+      const captureInterval = 150; // ms
+
+      for (let i = 0; i < numFrames; i++) {
+        try {
+          const frame = captureFrame();
+          frames.push(frame);
+        } catch (e) {
+          console.warn('Frame capture failed:', e);
+        }
+        if (i < numFrames - 1) {
+          await new Promise((resolve) => setTimeout(resolve, captureInterval));
+        }
+      }
+
+      if (frames.length === 0) {
+        throw new Error('카메라 화면을 캡처할 수 없습니다.');
+      }
 
       const response = await fetch(`${API_BASE_URL}/api/v1/interpreter/translate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          image_data: imageData,
+          image_data: frames,
           input_type: 'camera',
           language_from: 'ko',
           language_to: 'en',

@@ -1,3 +1,4 @@
+from typing import Union, List
 import base64
 import json
 import random
@@ -67,38 +68,7 @@ def validate_sign_rules(word_name: str, payload: list) -> bool:
         if not sequence or len(payload) == 0:
             return True
             
-        rule_step = sequence[0]
-        user_step = payload[0]
-        
-        r_rule = rule_step.get("right_hand", {})
-        l_rule = rule_step.get("left_hand", {})
-        
-        if isinstance(r_rule, str):
-            try: r_rule = json.loads(r_rule)
-            except: r_rule = {}
-        if isinstance(l_rule, str):
-            try: l_rule = json.loads(l_rule)
-            except: l_rule = {}
-            
-        r_user = user_step.get("right_hand", {})
-        l_user = user_step.get("left_hand", {})
-        
-        rule_uses_right = r_rule.get("shape", "none") != "none"
-        rule_uses_left = l_rule.get("shape", "none") != "none"
-        
-        user_uses_right = r_user.get("shape", "none") != "none"
-        user_uses_left = l_user.get("shape", "none") != "none"
-        
-        # 1. 한손 vs 양손 일치 여부 검증
-        if rule_uses_right != user_uses_right or rule_uses_left != user_uses_left:
-            msg = f"One-hand vs Two-hand mismatch for {word_name}. Rule uses R:{rule_uses_right} L:{rule_uses_left}, User uses R:{user_uses_right} L:{user_uses_left}"
-            try:
-                with open(debug_log_path, "a", encoding="utf-8") as f:
-                    f.write(f"[{datetime.now()}] [VALIDATOR] {msg}\n")
-            except Exception: pass
-            return False
-            
-        # 2. 수형 일치 여부 검증
+        # 수형 일치 여부 검증 헬퍼
         def is_shape_compatible(rule_shape, user_shape):
             if not rule_shape or rule_shape == "none":
                 return not user_shape or user_shape == "none"
@@ -111,42 +81,70 @@ def validate_sign_rules(word_name: str, payload: list) -> bool:
                 return True
             if rule_shape in ["open_palm", "편 손", "5지"] and user_shape in ["open_palm", "편 손", "5지"]:
                 return True
-            return rule_shape == user_shape or rule_shape in user_shape or user_shape in rule_shape
+            rule_normalized = rule_shape.replace("·", ",").replace(" ", "")
+            user_normalized = user_shape.replace("·", ",").replace(" ", "")
+            return rule_normalized == user_normalized or rule_normalized in user_normalized or user_normalized in rule_normalized
 
-        if rule_uses_right:
-            if not is_shape_compatible(r_rule.get("shape", ""), r_user.get("shape", "")):
-                msg = f"Right hand shape mismatch for {word_name}. Rule: {r_rule.get('shape')}, User: {r_user.get('shape')}"
-                try:
-                    with open(debug_log_path, "a", encoding="utf-8") as f:
-                        f.write(f"[{datetime.now()}] [VALIDATOR] {msg}\n")
-                except Exception: pass
-                return False
-        if rule_uses_left:
-            if not is_shape_compatible(l_rule.get("shape", ""), l_user.get("shape", "")):
-                msg = f"Left hand shape mismatch for {word_name}. Rule: {l_rule.get('shape')}, User: {l_user.get('shape')}"
-                try:
-                    with open(debug_log_path, "a", encoding="utf-8") as f:
-                        f.write(f"[{datetime.now()}] [VALIDATOR] {msg}\n")
-                except Exception: pass
-                return False
-                
-        # 3. 액션(동적 움직임) 일치 여부 검증
-        rule_act = rule_step.get("action", "none")
-        user_act = user_step.get("action", "none")
-        if rule_act != "none" and user_act == "none":
-            msg = f"Action mismatch for {word_name}. Rule action: {rule_act}, User action: {user_act}"
-            try:
-                with open(debug_log_path, "a", encoding="utf-8") as f:
-                    f.write(f"[{datetime.now()}] [VALIDATOR] {msg}\n")
-            except Exception: pass
-            return False
+        # Soft matching: 사용자가 캡처한 수어 단계들이 DB 규칙 데이터의 흐름과 얼마나 일치하는지 비율 계산
+        matched_steps = 0
+        total_checks = len(payload)
+        
+        for user_step in payload:
+            r_user = user_step.get("right_hand", {})
+            l_user = user_step.get("left_hand", {})
+            user_uses_right = r_user.get("shape", "none") != "none"
+            user_uses_left = l_user.get("shape", "none") != "none"
             
-        msg = f"Validation successful for {word_name}!"
+            step_matched = False
+            # DB 시퀀스의 단계 중 하나라도 이 사용자 프레임과 매칭되는지 확인 (순서/속도 노이즈 완화)
+            for rule_step in sequence:
+                r_rule = rule_step.get("right_hand", {})
+                l_rule = rule_step.get("left_hand", {})
+                
+                if isinstance(r_rule, str):
+                    try: r_rule = json.loads(r_rule)
+                    except: r_rule = {}
+                if isinstance(l_rule, str):
+                    try: l_rule = json.loads(l_rule)
+                    except: l_rule = {}
+                
+                rule_uses_right = r_rule.get("shape", "none") != "none"
+                rule_uses_left = l_rule.get("shape", "none") != "none"
+                
+                # 1. 사용 손 일치 검증
+                if rule_uses_right != user_uses_right or rule_uses_left != user_uses_left:
+                    continue
+                    
+                # 2. 수형 일치 검증
+                shape_ok = True
+                if rule_uses_right:
+                    if not is_shape_compatible(r_rule.get("shape", ""), r_user.get("shape", "")):
+                        shape_ok = False
+                if rule_uses_left:
+                    if not is_shape_compatible(l_rule.get("shape", ""), l_user.get("shape", "")):
+                        shape_ok = False
+                        
+                if shape_ok:
+                    step_matched = True
+                    break
+            
+            if step_matched:
+                matched_steps += 1
+
+        match_rate = matched_steps / total_checks if total_checks > 0 else 0
+        
+        msg = f"[SOFT VALIDATOR] Word: '{word_name}' | Matched: {matched_steps}/{total_checks} | Rate: {match_rate:.2f}"
         try:
             with open(debug_log_path, "a", encoding="utf-8") as f:
-                f.write(f"[{datetime.now()}] [VALIDATOR] {msg}\n")
-        except Exception: pass
-        return True
+                f.write(f"[{datetime.now()}] {msg}\n")
+        except Exception:
+            pass
+            
+        # 매칭률이 40% 이상이거나, 아주 짧은 감지의 경우 최소 1개 이상 일치하면 유효하다고 판정
+        if match_rate >= 0.40 or (matched_steps >= 1 and total_checks <= 2):
+            return True
+            
+        return False
     except Exception as e:
         msg = f"Local validator exception for {word_name}: {e}"
         try:
@@ -269,11 +267,7 @@ def call_openai_model(payload: list, category: str) -> str:
         return ""
 
 
-def generate_behavior_description(payload: list) -> str:
-    if not payload or len(payload) == 0:
-        return "동작 감지 대기 중..."
-    
-    data = payload[0]
+def generate_behavior_description_for_step(data: dict) -> str:
     r = data.get("right_hand", {})
     l = data.get("left_hand", {})
     act = data.get("action", "none")
@@ -287,6 +281,22 @@ def generate_behavior_description(payload: list) -> str:
     l_touch = l.get("touching", "none")
     
     parts = []
+    
+    pos_map = {
+        "face": "얼굴", 
+        "cheek": "뺨", 
+        "chest": "가슴", 
+        "belly": "배(배꼽)",
+        "head": "머리",
+        "forehead": "이마",
+        "chin": "턱",
+        "right_eye": "오른쪽 눈",
+        "right_shoulder": "오른쪽 어깨",
+        "shoulder": "어깨",
+        "left_hand": "왼손",
+        "right_hand": "오른손"
+    }
+    touch_map = {"contact": "에 접촉하고", "near": " 근처로 가져가고"}
     
     # 오른손 매핑
     if r_shape != "none":
@@ -304,9 +314,6 @@ def generate_behavior_description(payload: list) -> str:
         }
         r_shape_ko = shape_map.get(r_shape, f"'{r_shape}' 모양으로")
         r_part += f" {r_shape_ko}"
-        
-        pos_map = {"face": "얼굴", "cheek": "뺨", "chest": "가슴", "belly": "배(배꼽)"}
-        touch_map = {"contact": "에 접촉하고", "near": " 근처로 가져가고"}
         
         r_pos_ko = pos_map.get(r_pos, "")
         r_touch_ko = touch_map.get(r_touch, "")
@@ -338,9 +345,6 @@ def generate_behavior_description(payload: list) -> str:
         l_shape_ko = shape_map.get(l_shape, f"'{l_shape}' 모양으로")
         l_part += f" {l_shape_ko}"
         
-        pos_map = {"face": "얼굴", "cheek": "뺨", "chest": "가슴", "belly": "배(배꼽)"}
-        touch_map = {"contact": "에 접촉하고", "near": " 근처로 가져가고"}
-        
         l_pos_ko = pos_map.get(l_pos, "")
         l_touch_ko = touch_map.get(l_touch, "")
         
@@ -364,9 +368,13 @@ def generate_behavior_description(payload: list) -> str:
         "upward": "위로 쓸어올리는 동작을 함",
         "downward": "아래로 쓸어내리는 동작을 함",
         "shake": "흔드는 동작을 함",
+        "left_right": "좌우로 흔드는 동작을 함",
         "up_down": "위아래로 흔드는 동작을 함",
         "leftward": "왼쪽으로 이동하는 동작을 함",
         "rightward": "오른쪽으로 이동하는 동작을 함",
+        "forward": "앞으로 내미는 동작을 함",
+        "forward_stroke": "앞으로 쳐내거나 튕기는 동작을 함",
+        "freeze": "그 상태로 멈춤",
     }
     act_ko = act_map.get(act, "")
     
@@ -378,293 +386,381 @@ def generate_behavior_description(payload: list) -> str:
     return sentence
 
 
-# 이미지 데이터를 입력받아 MediaPipe 랜드마크 분석 및 Azure OpenAI 추론을 통해 수어 문장을 인식합니다.
-def predict_sign_language_to_korean(image_data: str, category: str = "개념", client_ip: str = "default") -> tuple[str, float]:
-    # 프론트에서 canvas.toDataURL()로 보낸 값은 data:image/jpeg;base64,... 형태입니다.
-    if not image_data.startswith("data:image/"):
-        raise ValueError("image_data must be a base64 data URL.")
+def generate_behavior_description(payload: list) -> str:
+    if not payload or len(payload) == 0:
+        return "동작 감지 대기 중..."
+    return generate_behavior_description_for_step(payload[0])
 
-    # base64 이미지 디코딩
-    try:
-        header, encoded = image_data.split(",", 1)
-        image_bytes = base64.b64decode(encoded)
-        nparr = np.frombuffer(image_bytes, np.uint8)
-        img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-        if img is None:
-            raise ValueError("Decoded image is empty.")
-        # 디버깅을 위해 프론트로부터 수신한 이미지 디스크 저장
-        cv2.imwrite(DEBUG_CAPTURE_PATH, img)
-    except Exception as e:
-        raise ValueError(f"Failed to decode base64 image: {str(e)}")
 
-    # 미디어파이프 처리를 위해 RGB 변환 및 Hands/Pose 처리
-    img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    hand_results = hands_detector.process(img_rgb)
-    pose_results = pose_detector.process(img_rgb)
+# 이미지 데이터(단일 혹은 리스트)를 입력받아 MediaPipe 랜드마크 분석 및 Azure OpenAI 추론을 통해 수어 문장을 인식합니다.
+def predict_sign_language_to_korean(image_data_input: Union[str, list[str]], category: str = "개념", client_ip: str = "default") -> tuple[str, float]:
+    if isinstance(image_data_input, str):
+        image_data_list = [image_data_input]
+    else:
+        image_data_list = image_data_input
 
-    # 신체 랜드마크 기준 x, y좌표 초기값 (포즈 미검출 시 절대 좌표 백업)
-    nose_x = 0.5
-    nose_y = 0.3
-    shoulder_y = 0.55
-    hip_y = 0.8
-
-    if pose_results.pose_landmarks:
-        p_lms = pose_results.pose_landmarks.landmark
-        nose_x = p_lms[0].x
-        nose_y = p_lms[0].y
-        shoulder_y = (p_lms[11].y + p_lms[12].y) / 2.0
-        hip_y = (p_lms[23].y + p_lms[24].y) / 2.0
-
-    r_shape, r_pos, r_touch = "none", "none", "none"
-    l_shape, l_pos, l_touch = "none", "none", "none"
-    action_type = "none"
-
-    # 사용자 IP별 히스토리 객체 초기화 및 갱신
-    if client_ip not in landmarks_history:
-        landmarks_history[client_ip] = []
-        
-    current_frame_landmarks = {"right": None, "left": None}
-
-    # 디버깅용 텍스트 파일 경로
+    # Decode and process all frames in the list
+    frame_states = []
+    
+    # 디버깅 로그 경로
     debug_log_path = DEBUG_LOG_PATH
-
-    if hand_results.multi_hand_landmarks and hand_results.multi_handedness:
-        for idx, hand_handedness in enumerate(hand_results.multi_handedness):
-            label = hand_handedness.classification[0].label # Left 또는 Right
-            landmarks = hand_results.multi_hand_landmarks[idx].landmark
-            coords = [(lm.x, lm.y) for lm in landmarks]
+    
+    for frame_idx, img_data in enumerate(image_data_list):
+        if not img_data.startswith("data:image/"):
+            continue
             
-            if label == "Right":
-                current_frame_landmarks["right"] = coords
-            else:
-                current_frame_landmarks["left"] = coords
-
-            # A) 손가락 펴짐 여부 판별 및 수형(Shape) 조합 알고리즘
-            # 3D hand scale (손목 0번에서 중지 관절 9번까지의 3D 거리)
-            dx = landmarks[0].x - landmarks[9].x
-            dy = landmarks[0].y - landmarks[9].y
-            dz = landmarks[0].z - landmarks[9].z
-            hand_scale = (dx*dx + dy*dy + dz*dz)**0.5
-            if hand_scale == 0:
-                hand_scale = 0.001
-
-            # 엄지 끝 4번과 중지 관절 9번 사이의 3D 거리 측정
-            tdx = landmarks[4].x - landmarks[9].x
-            tdy = landmarks[4].y - landmarks[9].y
-            tdz = landmarks[4].z - landmarks[9].z
-            thumb_to_mid = (tdx*tdx + tdy*tdy + tdz*tdz)**0.5
+        try:
+            header, encoded = img_data.split(",", 1)
+            image_bytes = base64.b64decode(encoded)
+            nparr = np.frombuffer(image_bytes, np.uint8)
+            img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+            if img is None:
+                continue
             
-            # 손가락 2~5지의 펴짐 여부를 손목(0번) 기준 3D 정규화 유클리드 비로 판정 (앵글/원근 왜곡 제거)
-            def is_finger_open(tip_idx, base_idx):
-                base_dx = landmarks[base_idx].x - landmarks[0].x
-                base_dy = landmarks[base_idx].y - landmarks[0].y
-                base_dz = landmarks[base_idx].z - landmarks[0].z
-                base_dist = (base_dx*base_dx + base_dy*base_dy + base_dz*base_dz)**0.5
-                if base_dist == 0:
-                    base_dist = 0.001
-                tip_dx = landmarks[tip_idx].x - landmarks[0].x
-                tip_dy = landmarks[tip_idx].y - landmarks[0].y
-                tip_dz = landmarks[tip_idx].z - landmarks[0].z
-                tip_dist = (tip_dx*tip_dx + tip_dy*tip_dy + tip_dz*tip_dz)**0.5
-                return (tip_dist / base_dist) > 1.25
+            # 디버깅을 위해 프론트로부터 수신한 이미지 중 마지막 이미지를 저장
+            if frame_idx == len(image_data_list) - 1:
+                cv2.imwrite(DEBUG_CAPTURE_PATH, img)
+        except Exception as e:
+            print(f"Failed to decode frame {frame_idx}: {e}")
+            continue
 
-            is_1_open = (thumb_to_mid / hand_scale) > 0.6
-            is_2_open = is_finger_open(8, 5)
-            is_3_open = is_finger_open(12, 9)
-            is_4_open = is_finger_open(16, 13)
-            is_5_open = is_finger_open(20, 17)
+        img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        hand_results = hands_detector.process(img_rgb)
+        pose_results = pose_detector.process(img_rgb)
 
-            opened_fingers = []
-            if is_1_open: opened_fingers.append("1")
-            if is_2_open: opened_fingers.append("2")
-            if is_3_open: opened_fingers.append("3")
-            if is_4_open: opened_fingers.append("4")
-            if is_5_open: opened_fingers.append("5")
+        # 신체 랜드마크 기준 x, y좌표 초기값 (포즈 미검출 시 절대 좌표 백업)
+        nose_x, nose_y = 0.5, 0.3
+        r_eye_x, r_eye_y = 0.45, 0.28
+        l_eye_x, l_eye_y = 0.55, 0.28
+        shoulder_y = 0.55
+        r_shoulder_x, r_shoulder_y = 0.4, 0.55
+        l_shoulder_x, l_shoulder_y = 0.6, 0.55
+        hip_y = 0.8
 
-            # 학습 데이터셋 형식에 맞춰 shapes와 positions 변환
-            if len(opened_fingers) == 0:
-                shape_str = "fist"
-            elif len(opened_fingers) >= 4:
-                shape_str = "open_palm"
-            else:
-                shape_str = ", ".join([f"{f}지" for f in opened_fingers])
-            
-            # B) 손의 상대적 위치 계산 (신체 상대 좌표 기준 - 어깨선과 어깨/골반 중간선 적용)
-            avg_x = sum([lm.x for lm in landmarks]) / 21
-            avg_y = sum([lm.y for lm in landmarks]) / 21
-            chest_hip_mid = (shoulder_y + hip_y) / 2.0
-            
-            if avg_y < shoulder_y - 0.02: # 어깨선보다 위쪽이면 face
-                pos_str = "face"
-            elif avg_y < chest_hip_mid:
-                pos_str = "chest"
-            else:
-                pos_str = "none"  # 학습 데이터셋의 하단 기본값은 none입니다.
-            
-            # C) 접촉(touching) 판정 로직
-            touch_str = "none"
-            if pos_str == "face":
-                dist_to_nose = ((avg_x - nose_x)**2 + (avg_y - nose_y)**2)**0.5
-                if dist_to_nose < 0.16:
-                    touch_str = "contact"
-                elif dist_to_nose < 0.28:
-                    touch_str = "near"
-            
-            # 디버깅 로그 기록
-            try:
-                with open(debug_log_path, "a", encoding="utf-8") as f:
-                    f.write(f"MP Label: {label} | avg_y: {avg_y:.4f} | Nose_Y: {nose_y:.4f} | Sh_Y: {shoulder_y:.4f} | Hip_Y: {hip_y:.4f} | Pos: {pos_str} | Shape: {shape_str} | Touch: {touch_str}\n")
-            except Exception:
-                pass
+        if pose_results.pose_landmarks:
+            p_lms = pose_results.pose_landmarks.landmark
+            nose_x = p_lms[0].x
+            nose_y = p_lms[0].y
+            r_eye_x = p_lms[5].x
+            r_eye_y = p_lms[5].y
+            l_eye_x = p_lms[2].x
+            l_eye_y = p_lms[2].y
+            shoulder_y = (p_lms[11].y + p_lms[12].y) / 2.0
+            r_shoulder_x, r_shoulder_y = p_lms[12].x, p_lms[12].y
+            l_shoulder_x, l_shoulder_y = p_lms[11].x, p_lms[11].y
+            hip_y = (p_lms[23].y + p_lms[24].y) / 2.0
 
-            # 좌/우 매칭 (사용자의 실제 오른손이 Left로 오인되는 라벨 매칭 스왑 적용)
-            # MediaPipe label "Left" ➡️ 실질적으로 오른손(Right) 필드에 대입
-            if label == "Left":
-                r_shape = shape_str
-                r_pos = pos_str
-                r_touch = touch_str
-            else:
-                l_shape = shape_str
-                l_pos = pos_str
-                l_touch = touch_str
+        r_shape, r_pos, r_touch, r_coord, r_scale = "none", "none", "none", None, 0.0
+        l_shape, l_pos, l_touch, l_coord, l_scale = "none", "none", "none", None, 0.0
 
-    # 히스토리 큐에 추가 및 최대 크기 유지
-    landmarks_history[client_ip].append(current_frame_landmarks)
-    if len(landmarks_history[client_ip]) > MAX_HISTORY_LEN:
-        landmarks_history[client_ip].pop(0)
+        r_avg_x, r_avg_y = 0.5, 0.5
+        l_avg_x, l_avg_y = 0.5, 0.5
+        has_right_hand = False
+        has_left_hand = False
 
-    # D) 프레임 간 좌표값 변화를 이용한 동적 action 판정
-    history = landmarks_history[client_ip]
-    r_coords = [h["right"][0] for h in history if h["right"] is not None]  # 0번 손목 기준
-    l_coords = [h["left"][0] for h in history if h["left"] is not None]
-
-    def analyze_coords_to_action(coords, threshold=0.03) -> str:
-        if len(coords) < 3:
-            return "none"
-        
-        # 1) 미세 진동(jitter) 제거를 위해 인접 프레임 간 차이가 0.008 이상인 움직임만 수형 방향 판별에 사용
-        valid_diffs_x = []
-        valid_diffs_y = []
-        for i in range(1, len(coords)):
-            dx_i = coords[i][0] - coords[i-1][0]
-            dy_i = coords[i][1] - coords[i-1][1]
-            if abs(dx_i) > 0.008:
-                valid_diffs_x.append(dx_i)
-            if abs(dy_i) > 0.008:
-                valid_diffs_y.append(dy_i)
-        
-        # 2) 노이즈 필터링된 유효 동작 간의 부호 바뀜(방향 전환) 카운트
-        x_changes = 0
-        for i in range(1, len(valid_diffs_x)):
-            if valid_diffs_x[i] * valid_diffs_x[i-1] < 0:
-                x_changes += 1
+        if hand_results.multi_hand_landmarks and hand_results.multi_handedness:
+            for idx, hand_handedness in enumerate(hand_results.multi_handedness):
+                label = hand_handedness.classification[0].label # Left 또는 Right
+                landmarks = hand_results.multi_hand_landmarks[idx].landmark
+                coords = [(lm.x, lm.y) for lm in landmarks]
                 
-        y_changes = 0
-        for i in range(1, len(valid_diffs_y)):
-            if valid_diffs_y[i] * valid_diffs_y[i-1] < 0:
-                y_changes += 1
+                avg_x = sum([lm.x for lm in landmarks]) / 21
+                avg_y = sum([lm.y for lm in landmarks]) / 21
+                
+                # A) 손가락 펴짐 여부 판별 및 수형(Shape) 조합 알고리즘
+                dx = landmarks[0].x - landmarks[9].x
+                dy = landmarks[0].y - landmarks[9].y
+                dz = landmarks[0].z - landmarks[9].z
+                hand_scale = (dx*dx + dy*dy + dz*dz)**0.5
+                if hand_scale == 0:
+                    hand_scale = 0.001
+
+                tdx = landmarks[4].x - landmarks[9].x
+                tdy = landmarks[4].y - landmarks[9].y
+                tdz = landmarks[4].z - landmarks[9].z
+                thumb_to_mid = (tdx*tdx + tdy*tdy + tdz*tdz)**0.5
+                
+                def is_finger_open(tip_idx, base_idx):
+                    base_dx = landmarks[base_idx].x - landmarks[0].x
+                    base_dy = landmarks[base_idx].y - landmarks[0].y
+                    base_dz = landmarks[base_idx].z - landmarks[0].z
+                    base_dist = (base_dx*base_dx + base_dy*base_dy + base_dz*base_dz)**0.5
+                    if base_dist == 0:
+                        base_dist = 0.001
+                    tip_dx = landmarks[tip_idx].x - landmarks[0].x
+                    tip_dy = landmarks[tip_idx].y - landmarks[0].y
+                    tip_dz = landmarks[tip_idx].z - landmarks[0].z
+                    tip_dist = (tip_dx*tip_dx + tip_dy*tip_dy + tip_dz*tip_dz)**0.5
+                    return (tip_dist / base_dist) > 1.25
+
+                is_1_open = (thumb_to_mid / hand_scale) > 0.6
+                is_2_open = is_finger_open(8, 5)
+                is_3_open = is_finger_open(12, 9)
+                is_4_open = is_finger_open(16, 13)
+                is_5_open = is_finger_open(20, 17)
+
+                opened_fingers = []
+                if is_1_open: opened_fingers.append("1")
+                if is_2_open: opened_fingers.append("2")
+                if is_3_open: opened_fingers.append("3")
+                if is_4_open: opened_fingers.append("4")
+                if is_5_open: opened_fingers.append("5")
+
+                if len(opened_fingers) == 0:
+                    shape_str = "fist"
+                elif len(opened_fingers) >= 4:
+                    shape_str = "open_palm"
+                else:
+                    shape_str = "·".join(opened_fingers) + "지"
+                
+                # B) 손의 상대적 위치 계산
+                # 세부적인 얼굴/머리/어깨/손 등 위치 정보 매핑
+                pos_str = "none"
+                forehead_y = nose_y - 0.08
+                dist_to_forehead = ((avg_x - nose_x)**2 + (avg_y - forehead_y)**2)**0.5
+                chin_y = nose_y + 0.12
+                dist_to_chin = ((avg_x - nose_x)**2 + (avg_y - chin_y)**2)**0.5
+                dist_to_nose = ((avg_x - nose_x)**2 + (avg_y - nose_y)**2)**0.5
+                dist_to_r_eye = ((avg_x - r_eye_x)**2 + (avg_y - r_eye_y)**2)**0.5
+                dist_to_r_shoulder = ((avg_x - r_shoulder_x)**2 + (avg_y - r_shoulder_y)**2)**0.5
+                dist_to_l_shoulder = ((avg_x - l_shoulder_x)**2 + (avg_y - l_shoulder_y)**2)**0.5
+                chest_hip_mid = (shoulder_y + hip_y) / 2.0
+                
+                if dist_to_r_eye < 0.08:
+                    pos_str = "right_eye"
+                elif dist_to_forehead < 0.07:
+                    pos_str = "forehead"
+                elif dist_to_chin < 0.06:
+                    pos_str = "chin"
+                elif dist_to_nose < 0.15:
+                    pos_str = "face"
+                elif avg_y < nose_y - 0.08:
+                    pos_str = "head"
+                elif dist_to_r_shoulder < 0.10:
+                    pos_str = "right_shoulder"
+                elif dist_to_l_shoulder < 0.10:
+                    pos_str = "shoulder"
+                elif abs(avg_y - shoulder_y) < 0.08:
+                    pos_str = "shoulder"
+                elif avg_y < chest_hip_mid:
+                    pos_str = "chest"
+                else:
+                    pos_str = "none"
+
+                # C) 접촉 판정
+                touch_str = "none"
+                if pos_str != "none":
+                    target_x, target_y = None, None
+                    if pos_str == "right_eye":
+                        target_x, target_y = r_eye_x, r_eye_y
+                    elif pos_str == "forehead":
+                        target_x, target_y = nose_x, forehead_y
+                    elif pos_str == "chin":
+                        target_x, target_y = nose_x, chin_y
+                    elif pos_str == "face":
+                        target_x, target_y = nose_x, nose_y
+                    elif pos_str == "head":
+                        target_x, target_y = nose_x, nose_y - 0.1
+                    elif pos_str == "right_shoulder":
+                        target_x, target_y = r_shoulder_x, r_shoulder_y
+                    elif pos_str == "shoulder":
+                        target_x, target_y = l_shoulder_x, l_shoulder_y
+                    elif pos_str == "chest":
+                        target_x, target_y = nose_x, (shoulder_y + chest_hip_mid) / 2.0
+                    
+                    if target_x is not None and target_y is not None:
+                        dist = ((avg_x - target_x)**2 + (avg_y - target_y)**2)**0.5
+                        if dist < 0.07:
+                            touch_str = "contact"
+                        elif dist < 0.16:
+                            touch_str = "near"
+
+                # 스왑 적용 (MediaPipe Left 라벨 -> 사용자 기준 오른손)
+                if label == "Left":
+                    r_shape = shape_str
+                    r_pos = pos_str
+                    r_touch = touch_str
+                    r_coord = coords[0] # 손목 기준
+                    r_scale = hand_scale
+                    r_avg_x, r_avg_y = avg_x, avg_y
+                    has_right_hand = True
+                else:
+                    l_shape = shape_str
+                    l_pos = pos_str
+                    l_touch = touch_str
+                    l_coord = coords[0]
+                    l_scale = hand_scale
+                    l_avg_x, l_avg_y = avg_x, avg_y
+                    has_left_hand = True
+
+            # D) 양손이 매우 가까운 경우 상호 위치 판정 (left_hand, right_hand)
+            if has_right_hand and has_left_hand:
+                dist_hands = ((r_avg_x - l_avg_x)**2 + (r_avg_y - l_avg_y)**2)**0.5
+                if dist_hands < 0.12:
+                    r_pos = "left_hand"
+                    r_touch = "contact" if dist_hands < 0.07 else "near"
+                    l_pos = "right_hand"
+                    l_touch = "contact" if dist_hands < 0.07 else "near"
+
+        frame_states.append({
+            "r_shape": r_shape, "r_pos": r_pos, "r_touch": r_touch, "r_coord": r_coord, "r_scale": r_scale,
+            "l_shape": l_shape, "l_pos": l_pos, "l_touch": l_touch, "l_coord": l_coord, "l_scale": l_scale
+        })
+
+    # 손이 전혀 감지되지 않았을 때 AI 모델 호출 없이 빠른 대기 상태 응답 반환
+    all_none = all(f["r_shape"] == "none" and f["l_shape"] == "none" for f in frame_states)
+    if all_none or not frame_states:
+        return "동작 감지 대기 중... (카메라 앞에 손을 보여주세요)", 0.0
+
+    # E) 프레임 간 상태 전이를 분석하여 다단계 단계(Step) 분할 및 액션 판정
+    steps_grouped = []
+    current_step_state = None
+    current_step_frames = []
+
+    for state in frame_states:
+        state_repr = (state["r_shape"], state["r_pos"], state["r_touch"],
+                      state["l_shape"], state["l_pos"], state["l_touch"])
         
-        if x_changes >= 2:
-            return "shake"
-        if y_changes >= 2:
-            return "up_down"
-            
-        # 3) 단방향 큰 이동 판정
+        if current_step_state is None:
+            current_step_state = state_repr
+            current_step_frames = [state]
+        elif state_repr == current_step_state:
+            current_step_frames.append(state)
+        else:
+            steps_grouped.append({
+                "state": current_step_state,
+                "frames": current_step_frames
+            })
+            current_step_state = state_repr
+            current_step_frames = [state]
+
+    if current_step_frames:
+        steps_grouped.append({
+            "state": current_step_state,
+            "frames": current_step_frames
+        })
+
+    # 노이즈 필터링: 너무 짧은 빈 단계를 필터링
+    cleaned_steps = []
+    for step in steps_grouped:
+        st = step["state"]
+        is_empty = (st[0] == "none" and st[3] == "none")
+        if len(step["frames"]) < 2 and is_empty and len(steps_grouped) > 1:
+            continue
+        cleaned_steps.append(step)
+        
+    if not cleaned_steps:
+        cleaned_steps = steps_grouped
+
+    # 각 단계의 궤적 분석을 통한 액션 추출 함수
+    def determine_action_from_trajectory(coords, scales, threshold=0.03) -> str:
+        if len(coords) < 2:
+            return "none"
         total_dx = coords[-1][0] - coords[0][0]
         total_dy = coords[-1][1] - coords[0][1]
+        scale_ratio = scales[-1] / (scales[0] if scales[0] > 0 else 0.001)
         
+        x_changes = 0
+        y_changes = 0
+        for i in range(2, len(coords)):
+            dx1 = coords[i][0] - coords[i-1][0]
+            dx2 = coords[i-1][0] - coords[i-2][0]
+            if dx1 * dx2 < 0 and abs(dx1) > 0.005:
+                x_changes += 1
+            dy1 = coords[i][1] - coords[i-1][1]
+            dy2 = coords[i-1][1] - coords[i-2][1]
+            if dy1 * dy2 < 0 and abs(dy1) > 0.005:
+                y_changes += 1
+
+        if x_changes >= 2:
+            return "left_right"
+        if y_changes >= 2:
+            return "none"
+            
+        if scale_ratio > 1.22:
+            return "forward_stroke" if len(coords) < 5 else "forward"
+            
         if abs(total_dy) > abs(total_dx) and abs(total_dy) > threshold:
             return "upward" if total_dy < 0 else "downward"
         elif abs(total_dx) > abs(total_dy) and abs(total_dx) > threshold:
-            return "rightward" if total_dx > 0 else "leftward"
+            return "leftward" if total_dx < 0 else "none"
+            
+        max_dist = max([((c[0]-coords[0][0])**2 + (c[1]-coords[0][1])**2)**0.5 for c in coords])
+        if max_dist < 0.015:
+            return "freeze"
             
         return "none"
 
-    if r_shape != "none":
-        action_type = analyze_coords_to_action(r_coords, threshold=0.03)
-    elif l_shape != "none":
-        action_type = analyze_coords_to_action(l_coords, threshold=0.03)
-
-    # client.py의 규격 매칭을 위한 행동 명세 페이로드 구성
-    live_action_payload = [
-        {
-            "step": 1,
+    # 최종 단계별 페이로드 구성
+    final_steps = []
+    for i, step in enumerate(cleaned_steps):
+        r_shape, r_pos, r_touch, l_shape, l_pos, l_touch = step["state"]
+        frames = step["frames"]
+        
+        r_coords = [f["r_coord"] for f in frames if f["r_coord"] is not None]
+        l_coords = [f["l_coord"] for f in frames if f["l_coord"] is not None]
+        r_scales = [f["r_scale"] for f in frames if f["r_scale"] is not None]
+        l_scales = [f["l_scale"] for f in frames if f["l_scale"] is not None]
+        
+        act = "none"
+        if r_shape != "none" and len(r_coords) >= 2:
+            act = determine_action_from_trajectory(r_coords, r_scales)
+        elif l_shape != "none" and len(l_coords) >= 2:
+            act = determine_action_from_trajectory(l_coords, l_scales)
+            
+        step_dict = {
+            "step": i + 1,
             "right_hand": {"shape": r_shape, "position": r_pos, "touching": r_touch},
             "left_hand": {"shape": l_shape, "position": l_pos, "touching": l_touch},
-            "action": action_type
+            "action": act
         }
-    ]
+        step_dict["description"] = generate_behavior_description_for_step(step_dict)
+        final_steps.append(step_dict)
 
-    print(f"DEBUG INPUT - Category: {category} | Payload: {json.dumps(live_action_payload, ensure_ascii=False)}")
-    
-    # 손이 감지되지 않았을 때 AI 모델 호출 없이 빠른 대기 상태 응답 반환
-    if r_shape == "none" and l_shape == "none":
-        return "동작 감지 대기 중... (카메라 앞에 손을 보여주세요)", 0.0
+    print(f"DEBUG INPUT - Category: {category} | Payload: {json.dumps(final_steps, ensure_ascii=False)}")
 
+    # 디버깅용 텍스트 로그 기록
     try:
         with open(debug_log_path, "a", encoding="utf-8") as f:
             f.write(f"\n--- [시작] Category: {category} ---\n")
-            f.write(f"Detected Shape: 우={r_shape}({r_pos},{r_touch}) | 좌={l_shape}({l_pos},{l_touch}) | 액션={action_type}\n")
+            f.write(f"Processed Multi-Step Payload: {json.dumps(final_steps, ensure_ascii=False)}\n")
     except Exception:
         pass
 
-    # 병렬 다중 매칭 후보 페이로드 구성 (학습 포맷에 맞춰 description 추가 및 노이즈 보정 후보 구성)
+    # 병렬 다중 매칭 후보 페이로드 구성 (노이즈 보정 후보 구성)
     candidates = []
-    
-    # 0. 원본 페이로드 (with auto-generated description)
-    p_original = [
-        {
-            "step": 1,
-            "right_hand": live_action_payload[0]["right_hand"].copy(),
-            "left_hand": live_action_payload[0]["left_hand"].copy(),
-            "action": action_type
-        }
-    ]
-    p_original[0]["description"] = generate_behavior_description(p_original)
-    candidates.append(("original", p_original))
-    
-    # 오른손 또는 왼손 중 하나라도 감지된 경우에만 보정 시작
-    r_f = live_action_payload[0]["right_hand"].copy()
-    l_f = live_action_payload[0]["left_hand"].copy()
-    act = action_type
+    candidates.append(("original", final_steps))
 
     # 1) 접촉 노이즈 보정 후보 (contact <-> near 교차 대입)
-    r_f_alt = r_f.copy()
-    l_f_alt = l_f.copy()
+    p_touch = []
     touch_modified = False
-
-    if r_f_alt["touching"] == "contact":
-        r_f_alt["touching"] = "near"
-        touch_modified = True
-    elif r_f_alt["touching"] == "near":
-        r_f_alt["touching"] = "contact"
-        touch_modified = True
-
-    if l_f_alt["touching"] == "contact":
-        l_f_alt["touching"] = "near"
-        touch_modified = True
-    elif l_f_alt["touching"] == "near":
-        l_f_alt["touching"] = "contact"
-        touch_modified = True
-
+    for step in final_steps:
+        step_copy = json.loads(json.dumps(step))
+        for hand in ["right_hand", "left_hand"]:
+            if step_copy[hand]["touching"] == "contact":
+                step_copy[hand]["touching"] = "near"
+                touch_modified = True
+            elif step_copy[hand]["touching"] == "near":
+                step_copy[hand]["touching"] = "contact"
+                touch_modified = True
+        p_touch.append(step_copy)
     if touch_modified:
-        p_touch = [
-            {"step": 1, "right_hand": r_f_alt, "left_hand": l_f_alt, "action": act}
-        ]
-        p_touch[0]["description"] = generate_behavior_description(p_touch)
+        for step in p_touch:
+            step["description"] = generate_behavior_description_for_step(step)
         candidates.append(("touch_alt", p_touch))
 
-    # 2) 액션 움직임 노이즈 보정 후보 (움직임 감지되었을 때 정지 상태 "none"로도 매칭)
-    if act != "none":
-        p_action = [
-            {
-                "step": 1,
-                "right_hand": r_f.copy(),
-                "left_hand": l_f.copy(),
-                "action": "none"
-            }
-        ]
-        p_action[0]["description"] = generate_behavior_description(p_action)
+    # 2) 액션 움직임 노이즈 보정 후보
+    p_action = []
+    action_modified = False
+    for step in final_steps:
+        step_copy = json.loads(json.dumps(step))
+        if step_copy["action"] != "none":
+            step_copy["action"] = "none"
+            action_modified = True
+        p_action.append(step_copy)
+    if action_modified:
+        for step in p_action:
+            step["description"] = generate_behavior_description_for_step(step)
         candidates.append(("action_alt", p_action))
 
     # 중복 제거
@@ -693,7 +789,7 @@ def predict_sign_language_to_korean(image_data: str, category: str = "개념", c
             except Exception as e:
                 results[idx] = (name, p, "", f"Error: {e}")
 
-    # 카테고리 기반 화이트리스트 단어 목록 조회 (학습 데이터셋 외 단어 환각 필터링)
+    # 카테고리 기반 화이트리스트 단어 목록 조회
     allowed_words = []
     try:
         from app.core.mongo_database import get_dictionary_collection
@@ -714,7 +810,7 @@ def predict_sign_language_to_korean(image_data: str, category: str = "개념", c
     except Exception as e:
         print(f"Failed to fetch whitelist from MongoDB: {e}")
 
-    # 최종 매칭 선택 (우선순위 순으로 유효한 한국어 단어 판별 & 카테고리 화이트리스트 필터링)
+    # 최종 매칭 선택
     final_cleaned = None
     final_raw = None
     selected_name = None
@@ -722,9 +818,8 @@ def predict_sign_language_to_korean(image_data: str, category: str = "개념", c
 
     for name, p, raw, cleaned in results:
         if cleaned and "동작 감지 대기 중" not in cleaned:
-            # 화이트리스트 체크
             is_allowed = False
-            if not allowed_words:  # 예외 상황 시 전체 허용 백업
+            if not allowed_words:
                 is_allowed = True
             else:
                 for allowed in allowed_words:
@@ -734,7 +829,6 @@ def predict_sign_language_to_korean(image_data: str, category: str = "개념", c
                         break
             
             if is_allowed:
-                # 로컬 수어 규칙 검증기를 통한 정밀 필터링 추가
                 if validate_sign_rules(cleaned, p):
                     final_cleaned = cleaned
                     final_raw = raw
