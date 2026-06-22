@@ -1,3 +1,4 @@
+from typing import Union, List
 from pydantic import BaseModel, Field
 
 
@@ -6,7 +7,7 @@ from pydantic import BaseModel, Field
 class TranslateRequestSchema(BaseModel):
     # 프론트에서 카메라 화면을 캡처한 base64 이미지 문자열입니다.
     # 실제 AI 모델을 붙이면 이 값을 디코딩해서 모델 입력 이미지로 사용할 수 있습니다.
-    image_data: str = Field(..., description="Base64 encoded camera frame.")
+    image_data: Union[str, List[str]] = Field(..., description="Base64 encoded camera frame or list of frames.")
 
     # 현재는 카메라 입력만 사용하지만, 나중에 이미지 업로드/동영상 업로드 등을 추가할 수 있어 둔 필드입니다.
     input_type: str = Field(default="camera", description="Translation input type.")
@@ -19,6 +20,9 @@ class TranslateRequestSchema(BaseModel):
     # 로그인 기능과 연결되면 사용자별 통역 기록을 남길 수 있습니다.
     # 아직 로그인 사용자 정보를 붙이지 않아도 API가 동작하도록 None을 허용합니다.
     user_id: int | None = Field(default=None, description="Optional logged-in user id.")
+
+    # 수어 인식 시 사용할 카테고리입니다.
+    category: str = Field(default="개념", description="Sign language category.")
 
 
 # 번역 API가 프론트로 돌려주는 응답 데이터 구조입니다.
