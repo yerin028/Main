@@ -37,6 +37,14 @@ class PaymentSchema(PaymentBase):
         from_attributes = True
 
 
+class BillingConfirmSchema(BaseModel):
+    auth_key: str
+    customer_key: str
+    amount: int
+    user_id: int
+
+
 PaymentCreateSchema = PaymentCreate
 PaymentStatusUpdateSchema = PaymentStatusUpdate
 PaymentConfirmSchema = PaymentConfirm
+

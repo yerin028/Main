@@ -203,9 +203,21 @@ def get_user(user_id: int, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.user_id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found.")
+    
+    # customer_key가 없는 기존 유저들을 위해 자동 생성 및 저장
+    if not user.customer_key:
+        user.customer_key = str(uuid.uuid4())
+        try:
+            db.commit()
+            db.refresh(user)
+        except Exception:
+            db.rollback()
+
     return {
         "user_id": user.user_id,
         "name": user.name,
         "email": user.email,
+        "customer_key": user.customer_key,
+        "billing_key": user.billing_key,
         "subscription_end_date": str(user.subscription_end_date) if user.subscription_end_date else None,
-    }
+    }
