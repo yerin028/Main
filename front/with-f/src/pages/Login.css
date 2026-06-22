@@ -1,0 +1,147 @@
+/*로그인*/
+
+.login-wrapper {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #dce8f5 0%, #f0eaf8 50%, #fce8ef 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.login-wrapper::before {
+    content: '';
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    border: 40px solid rgba(255, 255, 255, 0.4);
+    bottom: -80px;
+    right: 80px;
+}
+
+.login-wrapper::after {
+    content: '';
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    border: 30px solid rgba(255, 255, 255, 0.3);
+    top: 60px;
+    right: 200px;
+}
+
+.login-card {
+    background-color: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 80px 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    width: 500px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+    z-index: 1;
+}
+
+.login-title {
+    font-size: 36px;
+    font-weight: 900;
+    color: #1a2e55;
+    margin-bottom: 20px;
+}
+
+/* 카카오 */
+.kakao-btn {
+    width: 100%;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 12px;
+    background-color: #FEE500;
+    color: #000000;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.kakao-btn:hover {
+    background-color: #F6DC00;
+}
+
+/* 네이버 */
+.naver-btn {
+    width: 100%;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 12px;
+    background-color: #03C75A;
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.naver-btn:hover {
+    background-color: #02B350;
+}
+
+/* 구글 */
+.gsi-material-button {
+    background-color: #ffffff;
+    border: 1px solid #dadce0;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    height: 48px;
+    width: 100%;
+}
+
+.gsi-material-button:hover {
+    background-color: #f8f9fa;
+}
+
+.gsi-material-button-content-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    justify-content: center;
+}
+
+.gsi-material-button-icon {
+    width: 24px;
+    height: 24px;
+}
+
+.gsi-material-button-contents {
+    font-size: 15px;
+    font-weight: 600;
+    color: #3c4043;
+}
+
+.gsi-material-button-state {
+    display: none;
+}
+
+.social-btn-img {
+    width: 100%;
+    cursor: pointer;
+    border-radius: 12px;
+}
+
+.social-btn-img:hover {
+    opacity: 0.85;
+}

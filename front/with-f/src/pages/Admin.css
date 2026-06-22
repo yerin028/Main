@@ -1,0 +1,619 @@
+.admin-page {
+  width: min(1280px, calc(100% - 72px));
+  margin: 0 auto;
+  color: #061a44;
+  padding: 42px 0 56px;
+}
+
+.admin-main {
+  width: 100%;
+}
+
+.admin-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 18px;
+}
+
+.admin-title-row h1 {
+  margin: 0 0 5px;
+  color: #061a44;
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.admin-title-row p {
+  margin: 0;
+  color: #526486;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.admin-outline-action {
+  display: inline-flex;
+  min-width: 140px;
+  height: 38px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid #092967;
+  border-radius: 5px;
+  background: #ffffff;
+  color: #08265d;
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 900;
+  box-shadow: 0 2px 5px rgba(8, 38, 93, 0.08);
+}
+
+.admin-outline-action:hover {
+  background: #f6f9ff;
+}
+
+.admin-action-icon {
+  display: inline-flex;
+  width: 21px;
+  height: 21px;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  font-size: 14px;
+}
+
+.admin-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.admin-summary-card {
+  display: flex;
+  min-height: 70px;
+  align-items: center;
+  gap: 18px;
+  border: 1px solid #dce4f1;
+  border-radius: 7px;
+  background: #ffffff;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  padding: 14px;
+  text-align: left;
+  transition:
+    border-color 0.16s ease,
+    box-shadow 0.16s ease,
+    transform 0.16s ease;
+}
+
+.admin-summary-card:hover {
+  border-color: #b8cce8;
+  box-shadow: 0 8px 18px rgba(17, 31, 58, 0.08);
+  transform: translateY(-1px);
+}
+
+.admin-summary-card-active {
+  border-color: #092967;
+  box-shadow: 0 0 0 2px rgba(9, 41, 103, 0.08);
+}
+
+.admin-summary-icon {
+  display: inline-flex;
+  width: 42px;
+  height: 42px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: 26px;
+  font-weight: 900;
+}
+
+.admin-summary-icon-blue {
+  background: #eef3ff;
+  color: #0b3c91;
+}
+
+.admin-summary-icon-orange {
+  background: #fff6e8;
+  color: #f08313;
+}
+
+.admin-summary-icon-green {
+  background: #ecfbf1;
+  color: #109746;
+}
+
+.admin-summary-card span:not(.admin-summary-icon) {
+  display: block;
+  color: #526486;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.admin-summary-card strong {
+  display: block;
+  margin-top: 4px;
+  color: #092967;
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.admin-question-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(310px, 0.85fr);
+  align-items: stretch;
+  gap: 18px;
+}
+
+.admin-question-panel,
+.admin-detail-panel,
+.admin-refund-panel {
+  border: 1px solid #dce4f1;
+  border-radius: 7px;
+  background: #ffffff;
+}
+
+.admin-question-panel,
+.admin-detail-panel {
+  min-height: 500px;
+  padding: 18px;
+}
+
+.admin-question-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 13px;
+}
+
+.admin-panel-title {
+  margin: 0;
+  color: #071f54;
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.admin-search-box {
+  display: flex;
+  width: 220px;
+  height: 32px;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #d3deed;
+  border-radius: 4px;
+  color: #8090aa;
+  padding: 0 8px;
+}
+
+.admin-search-box input {
+  width: 100%;
+  border: 0;
+  outline: none;
+  color: #061a44;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.admin-search-box input::placeholder {
+  color: #8b98ad;
+}
+
+.admin-question-table,
+.admin-refund-table {
+  overflow: hidden;
+}
+
+.admin-question-table {
+  flex: 0 0 auto;
+  min-height: 358px;
+}
+
+.admin-question-row,
+.admin-refund-row {
+  display: grid;
+  align-items: center;
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid #edf1f7;
+  background: #ffffff;
+  color: #071f54;
+  font: inherit;
+  text-align: left;
+}
+
+.admin-question-row {
+  grid-template-columns: 82px minmax(160px, 1fr) 170px 112px;
+  min-height: 64px;
+  border-left: 5px solid transparent;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.admin-refund-row {
+  grid-template-columns: 62px 98px 150px minmax(130px, 1fr) 132px 94px 150px;
+  min-height: 52px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.admin-question-row:not(.admin-table-header):hover {
+  background: #fbfdff;
+}
+
+.admin-question-row-selected {
+  border-left-color: #092967;
+  background: #f8fbff;
+  box-shadow: 0 8px 18px rgba(17, 31, 58, 0.06);
+}
+
+.admin-question-row:last-child,
+.admin-refund-row:last-child {
+  border-bottom: 0;
+}
+
+.admin-question-row span,
+.admin-refund-row span {
+  min-width: 0;
+  overflow: hidden;
+  padding: 0 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-question-row > span:first-child,
+.admin-refund-row > span:first-child {
+  text-align: center;
+}
+
+.admin-question-row small {
+  display: block;
+  margin-top: 4px;
+  color: #526486;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.admin-question-row strong {
+  display: block;
+  overflow: hidden;
+  color: #071f54;
+  font-size: 11px;
+  font-weight: 900;
+  text-overflow: ellipsis;
+}
+
+.admin-table-header {
+  min-height: 38px;
+  border-left-color: transparent;
+  cursor: default;
+  color: #26395f;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.admin-status-badge {
+  display: inline-flex;
+  min-width: 56px;
+  min-height: 24px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #ffdba8;
+  border-radius: 5px;
+  background: #fff8ed;
+  color: #f08313;
+  font-size: 12px;
+  font-weight: 900;
+  padding: 0 9px;
+  white-space: nowrap;
+}
+
+.admin-status-badge-complete {
+  border-color: #bdeacb;
+  background: #ebfbf0;
+  color: #108a42;
+}
+
+.admin-empty-row,
+.admin-empty-detail {
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #7a8aa5;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.admin-pagination {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 20px;
+  padding-top: 20px;
+}
+
+.admin-pagination button {
+  min-width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #092967;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.admin-pagination button:disabled {
+  cursor: default;
+  opacity: 0.35;
+}
+
+.admin-pagination .admin-page-number-active {
+  background: #092967;
+  color: #ffffff;
+}
+
+.admin-detail-question-title {
+  margin: 18px 0 14px;
+  color: #061a44;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.admin-question-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 22px;
+  color: #071f54;
+}
+
+.admin-question-meta > span:not(.admin-status-badge) {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #26395f;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.admin-question-meta strong {
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #e2e8f2;
+  border-radius: 4px;
+  background: #f7f9fc;
+  color: #071f54;
+  font-size: 10px;
+  font-weight: 900;
+  padding: 0 9px;
+}
+
+.admin-detail-block {
+  margin-bottom: 28px;
+}
+
+.admin-detail-title {
+  margin: 0 0 8px;
+  color: #26395f;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.admin-question-content {
+  min-height: 74px;
+  border: 1px solid #dce4f1;
+  border-radius: 5px;
+  background: #fbfcfe;
+  padding: 16px;
+  color: #526486;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+.admin-question-content p {
+  margin: 0;
+}
+
+.admin-answer-preview {
+  background: #f6fbf8;
+  color: #0f5f35;
+}
+
+.admin-answer-input {
+  width: 100%;
+  height: 108px;
+  resize: vertical;
+  border: 1px solid #d0dbe9;
+  border-radius: 5px;
+  padding: 14px;
+  color: #071f54;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  outline: none;
+}
+
+.admin-answer-input::placeholder {
+  color: #7a8aa5;
+}
+
+.admin-answer-input:focus {
+  border-color: #092967;
+  box-shadow: 0 0 0 3px rgba(9, 41, 103, 0.08);
+}
+
+.admin-answer-input:disabled {
+  cursor: not-allowed;
+  background: #f3f6fb;
+  color: #7a8aa5;
+}
+
+.admin-answer-button {
+  width: 100%;
+  height: 42px;
+  margin-top: 14px;
+  border: 0;
+  border-radius: 5px;
+  background: #08265d;
+  color: #ffffff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.admin-answer-button:hover {
+  background: #061d48;
+}
+
+.admin-answer-button:disabled {
+  cursor: not-allowed;
+  background: #9aa8bd;
+}
+
+.admin-refund-panel {
+  padding: 18px;
+}
+
+.admin-refund-panel .admin-panel-title {
+  margin-bottom: 14px;
+}
+
+.admin-refund-table {
+  border: 1px solid #dce4f1;
+  border-radius: 7px;
+}
+
+.admin-action-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.admin-action-buttons button {
+  min-width: 54px;
+  height: 28px;
+  border-radius: 5px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.admin-action-buttons button:first-child {
+  border: 0;
+  background: #08265d;
+  color: #ffffff;
+}
+
+.admin-action-buttons button:last-child {
+  border: 1px solid #092967;
+  background: #ffffff;
+  color: #092967;
+}
+
+.admin-action-buttons button:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
+.admin-access-panel {
+  width: min(640px, calc(100% - 32px));
+  margin: 80px auto 0;
+  border: 1px solid #dce4f1;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 42px;
+  text-align: center;
+}
+
+.admin-access-panel h1 {
+  margin: 0 0 14px;
+  color: #08265d;
+  font-size: 26px;
+  font-weight: 900;
+}
+
+.admin-access-panel p {
+  margin: 0 0 24px;
+  color: #526486;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.admin-access-panel button {
+  height: 42px;
+  border: 0;
+  border-radius: 6px;
+  background: #08265d;
+  color: #ffffff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 900;
+  padding: 0 20px;
+}
+
+@media (max-width: 960px) {
+  .admin-page {
+    width: min(100% - 32px, 720px);
+  }
+
+  .admin-summary-grid,
+  .admin-question-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-refund-table {
+    overflow-x: auto;
+  }
+
+  .admin-refund-row {
+    min-width: 860px;
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-page {
+    width: calc(100% - 24px);
+    padding: 24px 0;
+  }
+
+  .admin-title-row,
+  .admin-panel-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .admin-search-box {
+    width: 100%;
+  }
+
+  .admin-question-table {
+    overflow-x: auto;
+  }
+
+  .admin-question-row {
+    min-width: 560px;
+  }
+}
