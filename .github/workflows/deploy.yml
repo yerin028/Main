@@ -44,6 +44,6 @@ jobs:
           port: ${{ secrets.SERVER_PORT }}
           script: |
             cd /home/${{ secrets.SERVER_USER }}/app
-            docker-compose pull
-            docker-compose up -d
-            docker image prune -f
+            sudo docker compose pull
+            sudo docker compose up -d
+            sudo docker image prune -f
