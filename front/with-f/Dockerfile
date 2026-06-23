@@ -1,5 +1,5 @@
 # 📄 프론트엔드 Dockerfile 수정 예시
-FROM node:18-alpine AS build
+FROM node:20-alpine AS build
 WORKDIR /app
 COPY package*.json ./
 RUN npm install
