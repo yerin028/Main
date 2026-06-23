@@ -60,3 +60,4 @@ absl-py==2.4.0
     tqdm==4.68.3                                                                                                                                                                                                  
     typing_extensions==4.15.0                                                                                                                                                                                     
     uvicorn==0.30.0
+    cryptography==42.0.5
