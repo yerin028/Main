@@ -28,8 +28,19 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./front/with-f
+          file: ./front/with-f/Dockerfile  # 💡 Dockerfile 위치를 명확하게 지정해 줬어
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/board-frontend:latest
+          # 🚀 깃허브 Secrets에 등록한 변수들을 Vite 빌드 시점에 주입하는 옵션 추가
+          build-args: |
+            VITE_API_URL=${{ secrets.VITE_API_URL }}
+            VITE_KAKAO_CLIENT_ID=${{ secrets.VITE_KAKAO_CLIENT_ID }}
+            VITE_KAKAO_REDIRECT_URI=${{ secrets.VITE_KAKAO_REDIRECT_URI }}
+            VITE_NAVER_CLIENT_ID=${{ secrets.VITE_NAVER_CLIENT_ID }}
+            VITE_NAVER_REDIRECT_URI=${{ secrets.VITE_NAVER_REDIRECT_URI }}
+            VITE_GOOGLE_CLIENT_ID=${{ secrets.VITE_GOOGLE_CLIENT_ID }}
+            VITE_GOOGLE_REDIRECT_URI=${{ secrets.VITE_GOOGLE_REDIRECT_URI }}
+            VITE_TOSS_CLIENT_KEY=${{ secrets.VITE_TOSS_CLIENT_KEY }}
 
   deploy:
     needs: build-and-push
@@ -45,5 +56,6 @@ jobs:
           script: |
             cd /home/${{ secrets.SERVER_USER }}/app
             sudo docker compose pull
-            sudo docker compose up -d
+            # 💡 빌드 시점에 환경변수가 주입되었으므로 --force-recreate로 컨테이너를 확실하게 갱신해 줘
+            sudo docker compose up -d --force-recreate
             sudo docker image prune -f
