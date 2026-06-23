@@ -12,7 +12,10 @@ function NaverCallback() {
         const code = new URL(window.location.href).searchParams.get('code');
         const state = new URL(window.location.href).searchParams.get('state');
 
-        fetch(`http://localhost:8000/api/v1/auth/login/naver?code=${code}&state=${state}`, {
+        // 🚀 하드코딩 주소 대신 깃허브 액션이 주입해준 환경변수를 읽도록 수정
+        const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+
+        fetch(`${API_BASE_URL}/api/v1/auth/login/naver?code=${code}&state=${state}`, {
             method: 'POST',
         })
         .then(res => {
